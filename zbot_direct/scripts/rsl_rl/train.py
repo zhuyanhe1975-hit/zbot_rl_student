@@ -17,6 +17,8 @@ from isaaclab.app import AppLauncher
 import cli_args  # isort: skip
 from checkpoint_compat import load_runner_checkpoint_compat  # isort: skip
 
+DEFAULT_LOG_ROOT_PATH = "/home/yhzhu/myWorks_vips/zbot_rl_runs/zbot_rl_student"
+
 # add argparse arguments
 parser = argparse.ArgumentParser(description="Train an RL agent with RSL-RL.")
 parser.add_argument("--video", action="store_true", default=False, help="Record videos during training.")
@@ -24,6 +26,12 @@ parser.add_argument("--video_length", type=int, default=200, help="Length of the
 parser.add_argument("--video_interval", type=int, default=2000, help="Interval between video recordings (in steps).")
 parser.add_argument("--num_envs", type=int, default=None, help="Number of environments to simulate.")
 parser.add_argument("--task", type=str, default=None, help="Name of the task.")
+parser.add_argument(
+    "--log_root_path",
+    type=str,
+    default=DEFAULT_LOG_ROOT_PATH,
+    help="Root directory for training logs and temporary checkpoints.",
+)
 parser.add_argument(
     "--agent", type=str, default="rsl_rl_cfg_entry_point", help="Name of the RL agent configuration entry point."
 )
@@ -145,8 +153,8 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
         agent_cfg.seed = seed
 
     # specify directory for logging experiments
-    log_root_path = os.path.join("logs", "rsl_rl", agent_cfg.experiment_name)
-    log_root_path = os.path.abspath(log_root_path)
+    log_root_path = os.path.abspath(os.path.expanduser(args_cli.log_root_path))
+    log_root_path = os.path.join(log_root_path, agent_cfg.experiment_name)
     print(f"[INFO] Logging experiment in directory: {log_root_path}")
     # specify directory for logging runs: {time-stamp}_{run_name}
     log_dir = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")

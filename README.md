@@ -58,7 +58,7 @@ zbot_direct/source/zbot_direct/zbot_direct/tasks/direct/zbot_direct/
 ## 安装与环境检查
 
 ```bash
-cd /home/yhzhu/myWorks/zbot_rl_core
+cd /home/yhzhu/myWorks_vips/zbot_rl_student
 ./install.sh
 ./list_envs.sh
 ```
@@ -94,6 +94,20 @@ $HOME/isaaclab/isaaclab.sh -p zbot_direct/scripts/rsl_rl/play_keyboard.py \
 ```
 
 `train.sh` 和 `run.sh` 使用同样原则：只保留一条激活命令，其余候选任务都注释掉。
+
+训练过程会产生大量临时 checkpoint、TensorBoard 日志、视频和参数文件。默认不要把这些中间结果写到仓库里，而是写到仓库外：
+
+```text
+/home/yhzhu/myWorks_vips/zbot_rl_runs/zbot_rl_student/
+```
+
+`train.sh` 中每条候选命令都显式带有：
+
+```bash
+--log_root_path /home/yhzhu/myWorks_vips/zbot_rl_runs/zbot_rl_student
+```
+
+这样训练目录和教学仓库分开管理。仓库里的 `pth/` 只保存少量精选 checkpoint，用于课堂演示、结果复现或 `run.sh` 播放。
 
 ## 当前任务 ID
 
@@ -229,5 +243,6 @@ bash -n train.sh
 ## 其他说明
 
 - `pth/` 保存已训练 checkpoint。
+- 临时训练结果默认保存到 `/home/yhzhu/myWorks_vips/zbot_rl_runs/zbot_rl_student/`，不要提交到 git。
 - 旧版 RSL-RL checkpoint 的加载兼容由 `checkpoint_compat.py` 处理。
 - 本仓库刻意排除了日志、Hydra 输出、Python cache、build 目录、导出 policy 等自动生成内容，以保持教学仓库简洁。
