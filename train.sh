@@ -3,8 +3,9 @@ set -euo pipefail
 
 # Activate exactly one command. Keep each command on one line so the active task is obvious.
 
+./train_velocity_imu_pipeline.sh
 # $HOME/isaaclab/isaaclab.sh -p zbot_direct/scripts/rsl_rl/train.py --task=Zbot-Direct-6dof-bipedal-velocity-v0 --num_envs=1024 --max_iterations=15000 --headless --log_root_path /home/yhzhu/myWorks_vips/zbot_rl_runs/zbot_rl_student
-$HOME/isaaclab/isaaclab.sh -p zbot_direct/scripts/rsl_rl/train.py --task=Zbot-Direct-6dof-bipedal-velocity-quat-v0 --num_envs=4096 --max_iterations=1500 --headless --log_root_path /home/yhzhu/myWorks_vips/zbot_rl_runs/zbot_rl_student
+# $HOME/isaaclab/isaaclab.sh -p zbot_direct/scripts/rsl_rl/train.py --task=Zbot-Direct-6dof-bipedal-velocity-quat-v0 --num_envs=4096 --max_iterations=1500 --headless --log_root_path /home/yhzhu/myWorks_vips/zbot_rl_runs/zbot_rl_student
 # $HOME/isaaclab/isaaclab.sh -p zbot_direct/scripts/rsl_rl/train.py --task=Zbot-Direct-6dof-bipedal-velocity-imu-v0 --num_envs=1024 --max_iterations=1500 --headless --load_run /home/yhzhu/myWorks_vips/zbot_rl_runs/zbot_rl_student/zbot_direct/2026-05-01_12-39-25/model_999.pt --log_root_path /home/yhzhu/myWorks_vips/zbot_rl_runs/zbot_rl_student
 # $HOME/isaaclab/isaaclab.sh -p zbot_direct/scripts/rsl_rl/train.py --task=Zbot-Direct-8dof-bipedal-velocity-v0 --num_envs=1024 --max_iterations=15000 --headless --log_root_path /home/yhzhu/myWorks_vips/zbot_rl_runs/zbot_rl_student
 # $HOME/isaaclab/isaaclab.sh -p zbot_direct/scripts/rsl_rl/train.py --task=Zbot-Direct-6dof-bipedal-v0 --num_envs=1024 --max_iterations=15000 --headless --log_root_path /home/yhzhu/myWorks_vips/zbot_rl_runs/zbot_rl_student
