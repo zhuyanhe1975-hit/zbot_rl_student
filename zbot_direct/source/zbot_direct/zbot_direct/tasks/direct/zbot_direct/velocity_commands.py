@@ -70,7 +70,7 @@ class ZbotVelocityCommands:
             velocity_factor = 0.0
         else:
             velocity_factor = min(1.0, float(self.common_step_counter - warmup_steps) / float(transition_steps))
-        stepping_factor = max(0.05, 1.0 - 0.95 * velocity_factor)
+        stepping_factor = max(0.5, 1.0 - 0.5 * velocity_factor)
         return stepping_factor, velocity_factor
 
 
