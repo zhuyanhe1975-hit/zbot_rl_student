@@ -5,8 +5,7 @@ import torch
 
 class ZbotVelocityRewards:
     def _reward_track_lin_vel_xy_exp(self):
-        actual_planar_vel = torch.cat((self.base_lin_vel_forward_b, self.base_lin_vel_side_b), dim=1)
-        lin_vel_error = torch.sum(torch.square(self._commands[:, :2] - actual_planar_vel), dim=1)
+        lin_vel_error = torch.sum(torch.square(self._commands[:, :2] - self.base_lin_vel_planar_b), dim=1)
         return torch.exp(-lin_vel_error / 0.05)
 
 
@@ -18,9 +17,8 @@ class ZbotVelocityRewards:
     def _reward_command_forward_progress(self):
         cmd_xy = self._commands[:, :2]
         cmd_speed = torch.norm(cmd_xy, dim=1)
-        actual_xy = torch.cat((self.base_lin_vel_forward_b, self.base_lin_vel_side_b), dim=1)
         cmd_dir = cmd_xy / torch.clamp(cmd_speed.unsqueeze(-1), min=1.0e-6)
-        aligned_speed = torch.sum(actual_xy * cmd_dir, dim=1)
+        aligned_speed = torch.sum(self.base_lin_vel_planar_b * cmd_dir, dim=1)
         moving_cmd = cmd_speed > 0.1
         reward = torch.zeros_like(cmd_speed)
         reward[moving_cmd] = torch.clamp(aligned_speed[moving_cmd], min=0.0)
@@ -30,9 +28,8 @@ class ZbotVelocityRewards:
     def _reward_command_speed_shortfall(self):
         cmd_xy = self._commands[:, :2]
         cmd_speed = torch.norm(cmd_xy, dim=1)
-        actual_xy = torch.cat((self.base_lin_vel_forward_b, self.base_lin_vel_side_b), dim=1)
         cmd_dir = cmd_xy / torch.clamp(cmd_speed.unsqueeze(-1), min=1.0e-6)
-        aligned_speed = torch.sum(actual_xy * cmd_dir, dim=1)
+        aligned_speed = torch.sum(self.base_lin_vel_planar_b * cmd_dir, dim=1)
         moving_cmd = cmd_speed > 0.1
         penalty = torch.zeros_like(cmd_speed)
         penalty[moving_cmd] = torch.clamp(cmd_speed[moving_cmd] - aligned_speed[moving_cmd], min=0.0)
@@ -63,7 +60,7 @@ class ZbotVelocityRewards:
         cmd_xy = self._commands[:, :2]
         cmd_speed = torch.norm(cmd_xy, dim=1)
         yaw_cmd = torch.abs(self._commands[:, 2])
-        actual_speed = torch.norm(torch.cat((self.base_lin_vel_forward_b, self.base_lin_vel_side_b), dim=1), dim=1)
+        actual_speed = torch.norm(self.base_lin_vel_planar_b, dim=1)
         actual_yaw_rate = torch.abs(self.base_ang_vel_z_b.squeeze(-1))
         joint_motion = torch.mean(torch.abs(self._robot.data.joint_vel), dim=1)
         standing_cmd = (cmd_speed < 0.05) & (yaw_cmd < 0.05)
@@ -79,8 +76,7 @@ class ZbotVelocityRewards:
     def _reward_lin_vel_xy_variance_l2(self):
         cmd_speed = torch.norm(self._commands[:, :2], dim=1)
         moving_cmd = cmd_speed > 0.1
-        actual_planar_vel = torch.cat((self.base_lin_vel_forward_b, self.base_lin_vel_side_b), dim=1)
-        vel_delta = actual_planar_vel - self._prev_base_lin_vel
+        vel_delta = self.base_lin_vel_planar_b - self._prev_base_lin_vel
         penalty = torch.zeros(self.num_envs, device=self.device)
         penalty[moving_cmd] = torch.sum(torch.square(vel_delta[moving_cmd]), dim=1)
         return penalty
@@ -181,7 +177,7 @@ class ZbotVelocityRewards:
     def _reward_feet_forward(self):
         return torch.sum(
             torch.norm(
-                self.feet_x_b - self.base_dir_forward_b.unsqueeze(1).repeat(1, len(self.feet_body_idx), 1),
+                self.feet_x_b - self.base_dir_forward_b.unsqueeze(1).expand(-1, len(self.feet_body_idx), -1),
                 dim=-1,
             ),
             dim=-1,
@@ -203,4 +199,3 @@ class ZbotVelocityRewards:
 
     def _reward_flat_orientation_l2(self):
         return torch.sum(torch.square(self._robot.data.projected_gravity_b[:, :2]), dim=1)
-

@@ -38,6 +38,13 @@ class ZbotVelocityEnv(
         self._joint_target_upper = self._make_optional_joint_limit("joint_target_upper")
 
         self._setup_body_indices()
+        self._axis_z = torch.tensor([0.0, 0.0, 1.0], device=self.device).repeat(self.num_envs, 1)
+        self._axis_x_feet = torch.tensor([1.0, 0.0, 0.0], device=self.device).repeat(
+            self.num_envs, len(self.feet_body_idx), 1
+        )
+        self._axis_z_feet = torch.tensor([0.0, 0.0, 1.0], device=self.device).repeat(
+            self.num_envs, len(self.feet_body_idx), 1
+        )
         self.dead_time = torch.zeros(self.num_envs, device=self.device)
         self.last_support_leg = -1 * torch.ones(self.num_envs, device=self.device, dtype=torch.long)
 
@@ -210,13 +217,14 @@ class ZbotVelocityEnv(
         self.extras["log"]["Learning/command_abs_vy"] = torch.mean(torch.abs(self._commands[:, 1])).item()
         self.extras["log"]["Learning/command_abs_wz"] = torch.mean(torch.abs(self._commands[:, 2])).item()
         self.extras["log"]["Learning/command_speed_xy"] = torch.mean(torch.norm(self._commands[:, :2], dim=1)).item()
-        actual_planar_vel = torch.cat((self.base_lin_vel_forward_b, self.base_lin_vel_side_b), dim=1)
-        self.extras["log"]["Learning/actual_speed_xy"] = torch.mean(torch.norm(actual_planar_vel, dim=1)).item()
+        self.extras["log"]["Learning/actual_speed_xy"] = torch.mean(
+            torch.norm(self.base_lin_vel_planar_b, dim=1)
+        ).item()
         self.extras["log"]["Learning/feet_forward_bias_integral_abs"] = torch.mean(
             torch.abs(self._feet_forward_bias_integral)
         ).item()
         self.extras["log"]["Learning/vel_tracking_error_xy"] = torch.mean(
-            torch.norm(self._commands[:, :2] - actual_planar_vel, dim=1)
+            torch.norm(self._commands[:, :2] - self.base_lin_vel_planar_b, dim=1)
         ).item()
         self.extras["log"]["Learning/vel_tracking_error_yaw"] = torch.mean(
             torch.abs(self._commands[:, 2] - self.base_ang_vel_z_b.squeeze(-1))
@@ -228,28 +236,22 @@ class ZbotVelocityEnv(
         self.base_pos_w = self._robot.data.body_pos_w[:, self.base_body_idx].squeeze(1)
         self.base_quat_w = self._robot.data.body_quat_w[:, self.base_body_idx].squeeze(1)
         self.feet_quat_w = self._robot.data.body_quat_w[:, self.feet_body_idx]
-        axis_z = torch.tensor([0.0, 0.0, 1.0], device=self.device).repeat(self.num_envs, 1)
-        axis_x_feet = torch.tensor([1.0, 0.0, 0.0], device=self.device).repeat(
-            self.num_envs, len(self.feet_body_idx), 1
-        )
-        axis_z_feet = torch.tensor([0.0, 0.0, 1.0], device=self.device).repeat(
-            self.num_envs, len(self.feet_body_idx), 1
-        )
         self.base_projected_gravity_b = math_utils.quat_apply_inverse(self.base_quat_w, self._robot.data.GRAVITY_VEC_W)
-        self.base_dir_forward_b = torch.cross(self.base_projected_gravity_b, axis_z, dim=-1)
+        self.base_dir_forward_b = torch.cross(self.base_projected_gravity_b, self._axis_z, dim=-1)
         self.base_dir_forward_b = torch.nn.functional.normalize(self.base_dir_forward_b, dim=-1)
-        self.base_dir_side_b = axis_z
+        self.base_dir_side_b = self._axis_z
         self.base_dir_forward_w = math_utils.quat_apply(self.base_quat_w, self.base_dir_forward_b)
-        self.base_dir_side_w = torch.cross(axis_z, self.base_dir_forward_w, dim=-1)
+        self.base_dir_side_w = torch.cross(self._axis_z, self.base_dir_forward_w, dim=-1)
         self.base_dir_side_w = torch.nn.functional.normalize(self.base_dir_side_w, dim=-1)
-        self.feet_z_w = math_utils.quat_apply(self.feet_quat_w, axis_z_feet)
-        self.feet_x_w = math_utils.quat_apply(self.feet_quat_w, axis_x_feet)
-        base_quat_for_feet = self.base_quat_w.unsqueeze(1).repeat(1, len(self.feet_body_idx), 1)
+        self.feet_z_w = math_utils.quat_apply(self.feet_quat_w, self._axis_z_feet)
+        self.feet_x_w = math_utils.quat_apply(self.feet_quat_w, self._axis_x_feet)
+        base_quat_for_feet = self.base_quat_w.unsqueeze(1).expand(-1, len(self.feet_body_idx), -1)
         self.feet_x_b = math_utils.quat_apply_inverse(base_quat_for_feet, self.feet_x_w)
         self.base_lin_vel_w = self._robot.data.body_lin_vel_w[:, self.base_body_idx, :].squeeze(1)
         self.base_lin_vel_b = math_utils.quat_apply_inverse(self.base_quat_w, self.base_lin_vel_w)
         self.base_lin_vel_forward_b = torch.sum(self.base_lin_vel_b * self.base_dir_forward_b, dim=-1, keepdim=True)
         self.base_lin_vel_side_b = torch.sum(self.base_lin_vel_b * self.base_dir_side_b, dim=-1, keepdim=True)
+        self.base_lin_vel_planar_b = torch.cat((self.base_lin_vel_forward_b, self.base_lin_vel_side_b), dim=1)
         self.base_ang_vel_w = self._robot.data.body_ang_vel_w[:, self.base_body_idx, :].squeeze(1)
         self.base_ang_vel_b = math_utils.quat_apply_inverse(self.base_quat_w, self.base_ang_vel_w)
         self.base_ang_vel_z_b = self.base_ang_vel_w[:, 2:3]
