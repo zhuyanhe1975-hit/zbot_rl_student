@@ -66,21 +66,6 @@ class ZbotVelocityRewards:
         return penalty
 
 
-    def _reward_lin_vel_xy_variance_l2(self):
-        vel_delta = self.base_lin_vel_planar_b - self._prev_base_lin_vel
-        penalty = torch.zeros(self.num_envs, device=self.device)
-        penalty[self._command_moving_xy] = torch.sum(torch.square(vel_delta[self._command_moving_xy]), dim=1)
-        return penalty
-
-
-    def _reward_ang_vel_z_variance_l2(self):
-        yaw_cmd = torch.abs(self._commands[:, 2]) > 0.1
-        yaw_delta = self.base_ang_vel_z_b.squeeze(-1) - self._prev_base_ang_vel_z
-        penalty = torch.zeros(self.num_envs, device=self.device)
-        penalty[yaw_cmd] = torch.square(yaw_delta[yaw_cmd])
-        return penalty
-
-
     def _reward_phase_match(self):
         self._update_step_phase_buffers()
         left_should_swing = self._step_sin >= 0.0

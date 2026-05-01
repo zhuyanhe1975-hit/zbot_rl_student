@@ -11,8 +11,6 @@ class ZbotVelocityCommands:
         "lateral_velocity_match",
         "yaw_when_translating",
         "command_stillness",
-        "lin_vel_xy_variance_l2",
-        "ang_vel_z_variance_l2",
     }
     _STEPPING_REWARD_NAMES = {
         "phase_match",
@@ -143,4 +141,3 @@ class ZbotVelocityCommands:
         if self._manual_command_override_enabled:
             self._commands.copy_(self._manual_commands)
             self._update_command_buffers()
-
