@@ -85,11 +85,8 @@ class ZbotVelocityEnv(
             self._processed_actions = unclamped_joint_targets
         self._joint_pos_target_delta = self._processed_actions - self._joint_reference_pos
 
-    def _get_observations(self) -> dict:
-        self._update_state_buffers()
-        self._previous_actions.copy_(self._actions)
-
-        obs = torch.cat(
+    def _get_teacher_observations(self) -> torch.Tensor:
+        return torch.cat(
             (
                 self.base_lin_vel_b,
                 self.base_ang_vel_b,
@@ -102,7 +99,31 @@ class ZbotVelocityEnv(
             ),
             dim=-1,
         )
-        return {"policy": obs}
+
+    def _get_policy_observations(self) -> torch.Tensor:
+        if getattr(self.cfg, "policy_observes_base_lin_vel", True):
+            return self._get_teacher_observations()
+        return torch.cat(
+            (
+                self.base_ang_vel_b,
+                self._robot.data.projected_gravity_b,
+                self._commands,
+                self._get_step_command_obs(),
+                self._robot.data.joint_pos - self._joint_reference_pos,
+                self._robot.data.joint_vel,
+                self._actions,
+            ),
+            dim=-1,
+        )
+
+    def _get_observations(self) -> dict:
+        self._update_state_buffers()
+        self._previous_actions.copy_(self._actions)
+
+        observations = {"policy": self._get_policy_observations()}
+        if getattr(self.cfg, "provide_teacher_observations", False):
+            observations["teacher"] = self._get_teacher_observations()
+        return observations
 
     def _get_rewards(self) -> torch.Tensor:
         self._update_state_buffers()

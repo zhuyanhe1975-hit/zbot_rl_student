@@ -28,6 +28,12 @@ _TASKS = (
         "Zbot6DofVelocityCfg",
     ),
     (
+        "Zbot-Direct-6dof-bipedal-velocity-imu-v0",
+        "Zbot6DofVelocityImuTaskEnv",
+        "Zbot6DofVelocityImuCfg",
+        "zbot_direct.tasks.direct.zbot_direct.agents.rsl_rl_distillation_cfg:VelocityImuDistillationRunnerCfg",
+    ),
+    (
         "Zbot-Direct-6dof-bipedal-quat-v0",
         "Zbot6DofBipedalQuatTaskEnv",
         "Zbot6DofBipedalQuatCfg",
@@ -86,7 +92,13 @@ _TASKS = (
 
 
 def register_tasks() -> None:
-    for task_id, env_class, cfg_class in _TASKS:
+    for task in _TASKS:
+        task_id, env_class, cfg_class = task[:3]
+        agent_cfg = (
+            task[3]
+            if len(task) > 3
+            else "zbot_direct.tasks.direct.zbot_direct.agents.rsl_rl_ppo_cfg:PPORunnerCfg"
+        )
         if task_id in registry:
             continue
         gym.register(
@@ -95,10 +107,7 @@ def register_tasks() -> None:
             disable_env_checker=True,
             kwargs={
                 "env_cfg_entry_point": f"zbot_direct.cfg:{cfg_class}",
-                "rsl_rl_cfg_entry_point": (
-                    "zbot_direct.tasks.direct.zbot_direct.agents."
-                    "rsl_rl_ppo_cfg:PPORunnerCfg"
-                ),
+                "rsl_rl_cfg_entry_point": agent_cfg,
             },
         )
 

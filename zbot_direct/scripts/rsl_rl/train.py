@@ -120,6 +120,29 @@ torch.backends.cudnn.deterministic = False
 torch.backends.cudnn.benchmark = False
 
 
+def _checkpoint_from_dir(directory: str, checkpoint: str | None = None) -> str:
+    if checkpoint and checkpoint not in {".*", ""}:
+        candidate = os.path.join(directory, checkpoint)
+        if os.path.isfile(candidate):
+            return candidate
+    checkpoints = [
+        filename for filename in os.listdir(directory) if filename.endswith(".pt") or filename.endswith(".pth")
+    ]
+    if not checkpoints:
+        raise ValueError(f"No checkpoint found in directory: '{directory}'")
+    return os.path.join(directory, sorted(checkpoints)[-1])
+
+
+def _resolve_checkpoint_path(log_root_path: str, load_run: str | None, load_checkpoint: str | None) -> str:
+    if load_checkpoint and os.path.isfile(load_checkpoint):
+        return os.path.abspath(load_checkpoint)
+    if load_run and os.path.isfile(load_run):
+        return os.path.abspath(load_run)
+    if load_run and os.path.isdir(load_run):
+        return os.path.abspath(_checkpoint_from_dir(load_run, load_checkpoint))
+    return get_checkpoint_path(log_root_path, load_run or ".*", load_checkpoint or ".*")
+
+
 @hydra_task_config(args_cli.task, args_cli.agent)
 def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agent_cfg: RslRlBaseRunnerCfg):
     """Train with RSL-RL agent."""
@@ -185,7 +208,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
 
     # save resume path before creating a new log_dir
     if agent_cfg.resume or agent_cfg.algorithm.class_name == "Distillation":
-        resume_path = get_checkpoint_path(log_root_path, agent_cfg.load_run, agent_cfg.load_checkpoint)
+        resume_path = _resolve_checkpoint_path(log_root_path, agent_cfg.load_run, agent_cfg.load_checkpoint)
 
     # wrap for video recording
     if args_cli.video:

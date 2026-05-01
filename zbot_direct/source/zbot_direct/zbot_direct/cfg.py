@@ -320,6 +320,13 @@ class Zbot6DofVelocityCfg(ZbotVelocityEnvCfg):
 
 
 @configclass
+class Zbot6DofVelocityImuCfg(Zbot6DofVelocityCfg):
+    observation_space = 30
+    policy_observes_base_lin_vel = False
+    provide_teacher_observations = True
+
+
+@configclass
 class Zbot8DofVelocityCfg(ZbotVelocityEnvCfg):
     robot: ArticulationCfg = ZBOT_D_8S_HUMAN_CFG.replace(prim_path=ROBOT_PRIM_PATH)
     action_space = 8

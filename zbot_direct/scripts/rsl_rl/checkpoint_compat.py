@@ -35,6 +35,12 @@ def load_runner_checkpoint_compat(runner, path: str):
     if not actor_state or not critic_state:
         raise ValueError(f"Could not translate legacy RSL-RL checkpoint: {path}")
 
+    if hasattr(runner.alg, "teacher") and hasattr(runner.alg, "student"):
+        runner.alg.teacher.load_state_dict(actor_state, strict=True)
+        runner.alg.teacher_loaded = True
+        print("[INFO]: Loaded legacy RSL-RL ActorCritic checkpoint as distillation teacher.")
+        return checkpoint.get("infos")
+
     runner.alg.actor.load_state_dict(actor_state, strict=True)
     runner.alg.critic.load_state_dict(critic_state, strict=True)
     runner.current_learning_iteration = checkpoint.get("iter", 0)

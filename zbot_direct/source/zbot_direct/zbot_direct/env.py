@@ -51,6 +51,10 @@ class Zbot6DofVelocityTaskEnv(ZbotVelocityEnv):
     """6dof omnidirectional velocity tracking; play uses keyboard control."""
 
 
+class Zbot6DofVelocityImuTaskEnv(ZbotVelocityEnv):
+    """6dof velocity student task; policy observes IMU-like signals, not base linear velocity."""
+
+
 class Zbot8DofBipedal0TaskEnv(ZbotBipedalEnv):
     """8dof bipedal baseline on the neutral human-like connection."""
 
