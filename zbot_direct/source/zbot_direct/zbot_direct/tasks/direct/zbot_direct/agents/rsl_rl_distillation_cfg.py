@@ -18,7 +18,7 @@ class TeacherActionDistillation(Distillation):
         self,
         *args,
         teacher_action_warmup_updates: int = 500,
-        teacher_action_blend_updates: int = 3000,
+        teacher_action_blend_updates: int = 500,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
@@ -56,7 +56,7 @@ class TeacherActionDistillationAlgorithmCfg(RslRlDistillationAlgorithmCfg):
         "zbot_direct.tasks.direct.zbot_direct.agents.rsl_rl_distillation_cfg:TeacherActionDistillation"
     )
     teacher_action_warmup_updates = 500
-    teacher_action_blend_updates = 3000
+    teacher_action_blend_updates = 500
 
 
 @configclass
