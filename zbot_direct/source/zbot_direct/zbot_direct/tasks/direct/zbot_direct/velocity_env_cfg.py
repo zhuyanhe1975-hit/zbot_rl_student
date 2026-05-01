@@ -7,25 +7,7 @@ from isaaclab.sensors import ContactSensorCfg
 from isaaclab.terrains import TerrainImporterCfg
 from isaaclab.utils import configclass
 
-
-DEFAULT_VELOCITY_REWARD_SCALES = {
-    "track_lin_vel_xy_exp": 8.0,
-    "track_ang_vel_z_exp": 0.5,
-    "command_forward_progress": 2.0,
-    "command_speed_shortfall": -1.0,
-    "lateral_velocity_match": 0.5,
-    "command_stillness": -0.2,
-    "lin_vel_xy_variance_l2": -0.05,
-    "ang_vel_z_variance_l2": 0.0,
-    "leg_toggle": 5.0,
-    "single_leg_support": 0.8,
-    "airtime_balance": -1.0,
-    "double_support": -0.4,
-    "action_rate_l2": -0.02,
-    "dof_torques_l2": -2.0e-4,
-    "joint_deviation_l1": -0.05,
-    "feet_slide": -0.5,
-}
+from zbot_direct.reward_scales import DEFAULT_VELOCITY_REWARD_SCALES
 
 
 @configclass

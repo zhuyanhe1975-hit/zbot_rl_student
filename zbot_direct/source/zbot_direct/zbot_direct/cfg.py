@@ -12,6 +12,7 @@ tasks/direct/zbot_direct/zbot_direct_robot_cfgs.py.
 
 Quick guide:
 - Change reward weights here.
+- For velocity tasks, edit the full *_REWARD_SCALES dictionaries below; cfg classes use them directly.
 - Change robot assets here, then inspect zbot_direct_robot_cfgs.py if needed.
 - Add a new task cfg here, then register it in zbot_direct/source/zbot_direct/zbot_direct/__init__.py.
 """
@@ -28,10 +29,11 @@ from isaaclab.sim import SimulationCfg
 from isaaclab.terrains import TerrainImporterCfg
 from isaaclab.utils import configclass
 
-from .tasks.direct.zbot_direct.velocity_env_cfg import (
-    DEFAULT_VELOCITY_REWARD_SCALES,
-    ZbotVelocityEnvCfg,
+from .reward_scales import (
+    ZBOT_6DOF_VELOCITY_REWARD_SCALES,
+    ZBOT_8DOF_VELOCITY_REWARD_SCALES,
 )
+from .tasks.direct.zbot_direct.velocity_env_cfg import ZbotVelocityEnvCfg
 from .tasks.direct.zbot_direct.zbot_direct_robot_cfgs import (
     ZBOT_D_6S_CFG,
     ZBOT_D_8S_HUMAN_2_BIPEDAL_2_CFG,
@@ -46,28 +48,6 @@ from .tasks.direct.zbot_direct.zbot_direct_robot_cfgs import (
 
 
 ROBOT_PRIM_PATH = "/World/envs/env_.*/Robot"
-
-ZBOT_8DOF_VELOCITY_REWARD_SCALES = {
-    "track_lin_vel_xy_exp": 8.0,
-    "track_ang_vel_z_exp": 0.5,
-    "command_forward_progress": 2.0,
-    "command_speed_shortfall": -1.0,
-    "lateral_velocity_match": 0.5,
-    "command_stillness": -0.2,
-    "lin_vel_xy_variance_l2": -0.05,
-    "ang_vel_z_variance_l2": 0.0,
-    "leg_toggle": 5.0,
-    "single_leg_support": 0.8,
-    "airtime_balance": -1.0,
-    "double_support": -0.4,
-    "action_rate_l2": -0.02,
-    "dof_torques_l2": -2.0e-4,
-    "joint_deviation_l1": -0.05,
-    "feet_slide": -0.5,
-    "feet_forward_bias_integral": -0.05,
-    "feet_downward": -1.0,
-    "feet_forward": -0.5,
-}
 
 
 @configclass
@@ -339,6 +319,7 @@ class Zbot6DofVelocityCfg(ZbotVelocityEnvCfg):
     robot: ArticulationCfg = ZBOT_D_6S_CFG.replace(prim_path=ROBOT_PRIM_PATH)
     action_space = 6
     observation_space = 33
+    reward_scales = ZBOT_6DOF_VELOCITY_REWARD_SCALES
 
 
 @configclass
