@@ -321,7 +321,7 @@ class Zbot6DofVelocityCfg(ZbotVelocityEnvCfg):
 
 @configclass
 class Zbot6DofVelocityImuCfg(Zbot6DofVelocityCfg):
-    observation_space = 30
+    observation_space = 34
     policy_observes_base_lin_vel = False
     provide_teacher_observations = True
 

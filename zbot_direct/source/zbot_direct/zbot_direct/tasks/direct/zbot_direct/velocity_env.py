@@ -105,6 +105,7 @@ class ZbotVelocityEnv(
             return self._get_teacher_observations()
         return torch.cat(
             (
+                self.base_quat_w,
                 self.base_ang_vel_b,
                 self._robot.data.projected_gravity_b,
                 self._commands,

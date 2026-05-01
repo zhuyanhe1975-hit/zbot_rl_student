@@ -156,7 +156,7 @@ Zbot-Direct-6dof-bipedal-velocity-imu-v0
 这个任务用于研究更接近真机部署的观测形式。
 
 - 教师 observation：包含 `base_lin_vel_b`，这是仿真特权信息，用于生成教师动作。
-- 学生 policy observation：不包含 `base_lin_vel_b`，只保留更接近硬件可获得的信息，例如 IMU 角速度、重力方向、关节状态、速度命令和历史动作。
+- 学生 policy observation：不包含 `base_lin_vel_b`，只保留更接近硬件可获得的信息，例如 IMU quat、IMU 角速度、重力方向、关节状态、速度命令和历史动作。
 - reward 仍然可以使用仿真里的真实 base 速度，因为 reward 不部署到硬件上。
 
 训练学生时，需要加载一个已训练好的 6dof velocity 教师 checkpoint。`train.sh` 中已有候选命令：
