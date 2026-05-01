@@ -54,6 +54,7 @@ class ZbotVelocityEnv(
         self._current_vel_visualizer = None
         self._goal_yaw_visualizer = None
         self._current_yaw_visualizer = None
+        self._state_buffer_step = -1
 
     def _make_joint_reference_pos(self) -> torch.Tensor:
         if hasattr(self.cfg, "reference_joint_pos"):
@@ -197,7 +198,7 @@ class ZbotVelocityEnv(
         else:
             self._resample_commands(env_ids)
         self._resample_step_commands(env_ids)
-        self._update_state_buffers()
+        self._update_state_buffers(force=True)
 
         extras = {}
         for key in self._episode_sums.keys():
@@ -232,7 +233,10 @@ class ZbotVelocityEnv(
 
 
 
-    def _update_state_buffers(self):
+    def _update_state_buffers(self, force: bool = False):
+        if not force and self._state_buffer_step == self.common_step_counter:
+            return
+
         self.base_pos_w = self._robot.data.body_pos_w[:, self.base_body_idx].squeeze(1)
         self.base_quat_w = self._robot.data.body_quat_w[:, self.base_body_idx].squeeze(1)
         self.feet_quat_w = self._robot.data.body_quat_w[:, self.feet_body_idx]
@@ -267,6 +271,7 @@ class ZbotVelocityEnv(
             self._contact_sensor.data.net_forces_w_history[:, :, self._feet_ids, 2], dim=1
         )
         self.feet_air_times = self._contact_sensor.data.last_air_time[:, self._feet_ids]
+        self._state_buffer_step = self.common_step_counter
 
     def _update_feet_forward_bias_integral(self):
         self._feet_forward_bias_integral += self.feet_forward_diff * self.step_dt
