@@ -14,8 +14,14 @@ class ZbotVelocityRewards:
         return torch.exp(-yaw_rate_error / 0.25)
 
 
-    def _reward_yaw_rate_l1(self):
-        return torch.abs(self._commands[:, 2] - self.base_ang_vel_z_b.squeeze(-1))
+    def _reward_yaw_acc_z_l2(self):
+        yaw_acc = (self.base_ang_vel_z_b.squeeze(-1) - self._prev_base_ang_vel_z) / self.step_dt
+        return torch.square(yaw_acc)
+
+
+    def _reward_lin_acc_xy_l2(self):
+        lin_acc_xy = (self.base_lin_vel_planar_b - self._prev_base_lin_vel) / self.step_dt
+        return torch.sum(torch.square(lin_acc_xy), dim=1)
 
 
     def _reward_command_forward_progress(self):

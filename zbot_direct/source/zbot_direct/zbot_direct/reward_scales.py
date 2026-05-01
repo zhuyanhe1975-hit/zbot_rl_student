@@ -12,7 +12,8 @@ objects, so changes here are used by training without a separate sync step.
 ZBOT_6DOF_VELOCITY_REWARD_SCALES = {
     "track_lin_vel_xy_exp": 4.0,
     "track_ang_vel_z_exp": 1.0,
-    "yaw_rate_l1": -0.5,
+    "yaw_acc_z_l2": -0.005,
+    "lin_acc_xy_l2": -0.005,
     "command_forward_progress": 2.0,
     "command_speed_shortfall": -1.0,
     "lateral_velocity_match": 0.5,
@@ -33,6 +34,8 @@ DEFAULT_VELOCITY_REWARD_SCALES = ZBOT_6DOF_VELOCITY_REWARD_SCALES
 ZBOT_8DOF_VELOCITY_REWARD_SCALES = {
     "track_lin_vel_xy_exp": 8.0,
     "track_ang_vel_z_exp": 0.5,
+    "yaw_acc_z_l2": -0.005,
+    "lin_acc_xy_l2": -0.005,
     "command_forward_progress": 2.0,
     "command_speed_shortfall": -1.0,
     "lateral_velocity_match": 0.5,
