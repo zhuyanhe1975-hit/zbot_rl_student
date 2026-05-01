@@ -19,24 +19,20 @@ class ZbotVelocityRewards:
 
 
     def _reward_command_forward_progress(self):
-        cmd_xy = self._commands[:, :2]
-        cmd_speed = torch.norm(cmd_xy, dim=1)
-        cmd_dir = cmd_xy / torch.clamp(cmd_speed.unsqueeze(-1), min=1.0e-6)
-        aligned_speed = torch.sum(self.base_lin_vel_planar_b * cmd_dir, dim=1)
-        moving_cmd = cmd_speed > 0.1
-        reward = torch.zeros_like(cmd_speed)
-        reward[moving_cmd] = torch.clamp(aligned_speed[moving_cmd], min=0.0)
+        reward = torch.zeros_like(self._command_speed_xy)
+        reward[self._command_moving_xy] = torch.clamp(
+            self._command_aligned_speed[self._command_moving_xy], min=0.0
+        )
         return reward
 
 
     def _reward_command_speed_shortfall(self):
-        cmd_xy = self._commands[:, :2]
-        cmd_speed = torch.norm(cmd_xy, dim=1)
-        cmd_dir = cmd_xy / torch.clamp(cmd_speed.unsqueeze(-1), min=1.0e-6)
-        aligned_speed = torch.sum(self.base_lin_vel_planar_b * cmd_dir, dim=1)
-        moving_cmd = cmd_speed > 0.1
-        penalty = torch.zeros_like(cmd_speed)
-        penalty[moving_cmd] = torch.clamp(cmd_speed[moving_cmd] - aligned_speed[moving_cmd], min=0.0)
+        penalty = torch.zeros_like(self._command_speed_xy)
+        penalty[self._command_moving_xy] = torch.clamp(
+            self._command_speed_xy[self._command_moving_xy]
+            - self._command_aligned_speed[self._command_moving_xy],
+            min=0.0,
+        )
         return penalty
 
 
@@ -51,38 +47,29 @@ class ZbotVelocityRewards:
 
 
     def _reward_yaw_when_translating(self):
-        cmd_xy = self._commands[:, :2]
-        translating = torch.norm(cmd_xy, dim=1) > 0.15
-        low_yaw_cmd = torch.abs(self._commands[:, 2]) < 0.2
         penalty = torch.zeros(self.num_envs, device=self.device)
-        mask = translating & low_yaw_cmd
+        mask = self._command_translating & self._command_low_yaw
         penalty[mask] = torch.abs(self.base_ang_vel_z_b[mask, 0])
         return penalty
 
 
     def _reward_command_stillness(self):
-        cmd_xy = self._commands[:, :2]
-        cmd_speed = torch.norm(cmd_xy, dim=1)
-        yaw_cmd = torch.abs(self._commands[:, 2])
         actual_speed = torch.norm(self.base_lin_vel_planar_b, dim=1)
         actual_yaw_rate = torch.abs(self.base_ang_vel_z_b.squeeze(-1))
         joint_motion = torch.mean(torch.abs(self._robot.data.joint_vel), dim=1)
-        standing_cmd = (cmd_speed < 0.05) & (yaw_cmd < 0.05)
-        penalty = torch.zeros_like(cmd_speed)
-        penalty[standing_cmd] = (
-            actual_speed[standing_cmd]
-            + 0.3 * actual_yaw_rate[standing_cmd]
-            + 0.02 * joint_motion[standing_cmd]
+        penalty = torch.zeros_like(self._command_speed_xy)
+        penalty[self._command_standing] = (
+            actual_speed[self._command_standing]
+            + 0.3 * actual_yaw_rate[self._command_standing]
+            + 0.02 * joint_motion[self._command_standing]
         )
         return penalty
 
 
     def _reward_lin_vel_xy_variance_l2(self):
-        cmd_speed = torch.norm(self._commands[:, :2], dim=1)
-        moving_cmd = cmd_speed > 0.1
         vel_delta = self.base_lin_vel_planar_b - self._prev_base_lin_vel
         penalty = torch.zeros(self.num_envs, device=self.device)
-        penalty[moving_cmd] = torch.sum(torch.square(vel_delta[moving_cmd]), dim=1)
+        penalty[self._command_moving_xy] = torch.sum(torch.square(vel_delta[self._command_moving_xy]), dim=1)
         return penalty
 
 
@@ -95,8 +82,8 @@ class ZbotVelocityRewards:
 
 
     def _reward_phase_match(self):
-        phase = self._get_step_phase()
-        left_should_swing = torch.sin(phase) >= 0.0
+        self._update_step_phase_buffers()
+        left_should_swing = self._step_sin >= 0.0
         contacts = self.feet_contact_forces > 1.0
         desired_contacts = torch.zeros_like(contacts)
         desired_contacts[:, 0] = ~left_should_swing
@@ -105,8 +92,8 @@ class ZbotVelocityRewards:
 
 
     def _reward_swing_height(self):
-        phase = self._get_step_phase()
-        left_should_swing = torch.sin(phase) >= 0.0
+        self._update_step_phase_buffers()
+        left_should_swing = self._step_sin >= 0.0
         swing_height = torch.where(left_should_swing, self.feet_height[:, 0], self.feet_height[:, 1])
         stance_height = torch.where(left_should_swing, self.feet_height[:, 1], self.feet_height[:, 0])
         clearance_target = self.cfg.stepping_clearance_target

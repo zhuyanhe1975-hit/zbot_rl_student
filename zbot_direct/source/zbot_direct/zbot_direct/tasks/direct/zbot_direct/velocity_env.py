@@ -26,12 +26,25 @@ class ZbotVelocityEnv(
         self._manual_commands = torch.zeros_like(self._commands)
         self._manual_command_override_enabled = False
         self._command_time_left = torch.zeros(self.num_envs, device=self.device)
+        self._command_speed_xy = torch.zeros(self.num_envs, device=self.device)
+        self._command_dir_xy = torch.zeros(self.num_envs, 2, device=self.device)
+        self._command_abs_yaw = torch.zeros(self.num_envs, device=self.device)
+        self._command_aligned_speed = torch.zeros(self.num_envs, device=self.device)
+        self._command_moving_xy = torch.zeros(self.num_envs, device=self.device, dtype=torch.bool)
+        self._command_translating = torch.zeros(self.num_envs, device=self.device, dtype=torch.bool)
+        self._command_low_yaw = torch.zeros(self.num_envs, device=self.device, dtype=torch.bool)
+        self._command_standing = torch.zeros(self.num_envs, device=self.device, dtype=torch.bool)
         self._joint_pos_target_delta = torch.zeros_like(self._robot.data.default_joint_pos)
         self._prev_base_lin_vel = torch.zeros(self.num_envs, 2, device=self.device)
         self._prev_base_ang_vel_z = torch.zeros(self.num_envs, device=self.device)
         self.joint_speed_limit = 2.0 + 0.0 * torch.rand(self.num_envs, 1, device=self.device)
         self._step_frequency_cmd = torch.zeros(self.num_envs, device=self.device)
         self._step_phase_offset = torch.zeros(self.num_envs, device=self.device)
+        self._step_phase = torch.zeros(self.num_envs, device=self.device)
+        self._step_sin = torch.zeros(self.num_envs, device=self.device)
+        self._step_cos = torch.ones(self.num_envs, device=self.device)
+        self._step_command_obs = torch.zeros(self.num_envs, 3, device=self.device)
+        self._step_phase_cache_step = -1
         self._feet_forward_bias_integral = torch.zeros(self.num_envs, device=self.device)
         self._joint_reference_pos = self._make_joint_reference_pos()
         self._joint_target_lower = self._make_optional_joint_limit("joint_target_lower")
@@ -49,6 +62,11 @@ class ZbotVelocityEnv(
         self.last_support_leg = -1 * torch.ones(self.num_envs, device=self.device, dtype=torch.long)
 
         self._setup_reward_functions()
+        self._reward_terms = tuple(
+            (name, self.reward_functions[name], self.reward_scales[name], self._get_reward_factor_kind(name))
+            for name in self.reward_functions
+        )
+        self._update_command_buffers()
 
         self._goal_vel_visualizer = None
         self._current_vel_visualizer = None
@@ -78,6 +96,7 @@ class ZbotVelocityEnv(
         else:
             self._resample_commands((self._command_time_left <= 0.0).nonzero(as_tuple=False).flatten())
             self._command_time_left -= self.step_dt
+        self._update_command_buffers()
 
         self._actions = torch.tanh(actions)
         self._joint_pos_target_delta += (
@@ -141,9 +160,17 @@ class ZbotVelocityEnv(
         self._update_feet_forward_bias_integral()
         stepping_factor, velocity_factor = self._get_curriculum_factors()
         reward = torch.zeros(self.num_envs, device=self.device, dtype=torch.float)
-        for name, reward_func in self.reward_functions.items():
-            reward_factor = self._get_reward_factor(name, stepping_factor, velocity_factor)
-            value = reward_func() * self.reward_scales[name] * reward_factor
+        yaw_active = velocity_factor >= self.cfg.yaw_tracking_start_ratio
+        for name, reward_func, reward_scale, factor_kind in self._reward_terms:
+            if factor_kind == "velocity":
+                reward_factor = velocity_factor
+            elif factor_kind == "yaw_velocity":
+                reward_factor = velocity_factor if yaw_active else 0.0
+            elif factor_kind == "stepping":
+                reward_factor = stepping_factor
+            else:
+                reward_factor = 1.0
+            value = reward_func() * reward_scale * reward_factor
             reward += value
             self._episode_sums[name] += value
 
@@ -198,6 +225,7 @@ class ZbotVelocityEnv(
         else:
             self._resample_commands(env_ids)
         self._resample_step_commands(env_ids)
+        self._update_command_buffers()
         self._update_state_buffers(force=True)
 
         extras = {}
@@ -271,20 +299,57 @@ class ZbotVelocityEnv(
             self._contact_sensor.data.net_forces_w_history[:, :, self._feet_ids, 2], dim=1
         )
         self.feet_air_times = self._contact_sensor.data.last_air_time[:, self._feet_ids]
+        self._update_command_aligned_speed()
         self._state_buffer_step = self.common_step_counter
+
+    def _update_command_buffers(self):
+        command_xy = self._commands[:, :2]
+        torch.sum(command_xy * command_xy, dim=1, out=self._command_speed_xy)
+        torch.sqrt(self._command_speed_xy, out=self._command_speed_xy)
+        self._command_dir_xy.copy_(command_xy)
+        self._command_dir_xy.div_(torch.clamp(self._command_speed_xy.unsqueeze(-1), min=1.0e-6))
+        torch.abs(self._commands[:, 2], out=self._command_abs_yaw)
+        self._command_moving_xy.copy_(self._command_speed_xy > 0.1)
+        self._command_translating.copy_(self._command_speed_xy > 0.15)
+        self._command_low_yaw.copy_(self._command_abs_yaw < 0.2)
+        self._command_standing.copy_((self._command_speed_xy < 0.05) & (self._command_abs_yaw < 0.05))
+        self._update_command_aligned_speed()
+
+    def _update_command_aligned_speed(self):
+        if not hasattr(self, "base_lin_vel_planar_b"):
+            return
+        torch.sum(self.base_lin_vel_planar_b * self._command_dir_xy, dim=1, out=self._command_aligned_speed)
 
     def _update_feet_forward_bias_integral(self):
         self._feet_forward_bias_integral += self.feet_forward_diff * self.step_dt
         self._feet_forward_bias_integral = torch.clamp(self._feet_forward_bias_integral, -5.0, 5.0)
 
     def _get_step_phase(self) -> torch.Tensor:
-        return 2.0 * torch.pi * self._step_frequency_cmd * (self.episode_length_buf.float() * self.step_dt) + self._step_phase_offset
+        self._update_step_phase_buffers()
+        return self._step_phase
+
+    def _update_step_phase_buffers(self):
+        if self._step_phase_cache_step == self.common_step_counter:
+            return
+        self._step_phase.copy_(self.episode_length_buf)
+        self._step_phase.mul_(self.step_dt)
+        self._step_phase.mul_(self._step_frequency_cmd)
+        self._step_phase.mul_(2.0 * torch.pi)
+        self._step_phase.add_(self._step_phase_offset)
+        torch.sin(self._step_phase, out=self._step_sin)
+        torch.cos(self._step_phase, out=self._step_cos)
+        self._step_phase_cache_step = self.common_step_counter
 
     def _get_step_command_obs(self) -> torch.Tensor:
-        phase = self._get_step_phase()
+        self._update_step_phase_buffers()
         freq_min, freq_max = self.cfg.stepping_frequency_range
-        freq_norm = 2.0 * (self._step_frequency_cmd - freq_min) / max(freq_max - freq_min, 1.0e-6) - 1.0
-        return torch.stack((torch.sin(phase), torch.cos(phase), freq_norm), dim=-1)
+        self._step_command_obs[:, 0].copy_(self._step_sin)
+        self._step_command_obs[:, 1].copy_(self._step_cos)
+        self._step_command_obs[:, 2].copy_(self._step_frequency_cmd)
+        self._step_command_obs[:, 2].sub_(freq_min)
+        self._step_command_obs[:, 2].mul_(2.0 / max(freq_max - freq_min, 1.0e-6))
+        self._step_command_obs[:, 2].sub_(1.0)
+        return self._step_command_obs
 
 
 

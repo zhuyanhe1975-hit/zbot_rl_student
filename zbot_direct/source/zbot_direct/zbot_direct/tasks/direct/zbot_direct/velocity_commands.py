@@ -4,6 +4,26 @@ import torch
 
 
 class ZbotVelocityCommands:
+    _VELOCITY_REWARD_NAMES = {
+        "track_lin_vel_xy_exp",
+        "command_forward_progress",
+        "command_speed_shortfall",
+        "lateral_velocity_match",
+        "yaw_when_translating",
+        "command_stillness",
+        "lin_vel_xy_variance_l2",
+        "ang_vel_z_variance_l2",
+    }
+    _STEPPING_REWARD_NAMES = {
+        "phase_match",
+        "swing_height",
+        "leg_toggle",
+        "single_leg_support",
+        "airtime_balance",
+        "double_support",
+        "dead_time",
+    }
+
     def _resample_commands(self, env_ids: torch.Tensor):
         if env_ids.numel() == 0:
             return
@@ -40,6 +60,7 @@ class ZbotVelocityCommands:
             return
         self._step_frequency_cmd[env_ids] = self._sample_uniform(self.cfg.stepping_frequency_range, env_ids.numel())
         self._step_phase_offset[env_ids] = self._sample_uniform((0.0, 2.0 * torch.pi), env_ids.numel())
+        self._step_phase_cache_step = -1
 
 
     def _get_curriculum_factors(self) -> tuple[float, float]:
@@ -73,31 +94,24 @@ class ZbotVelocityCommands:
 
 
     def _get_reward_factor(self, reward_name: str, stepping_factor: float, velocity_factor: float) -> float:
-        if reward_name in {
-            "track_lin_vel_xy_exp",
-            "track_ang_vel_z_exp",
-            "command_forward_progress",
-            "command_speed_shortfall",
-            "lateral_velocity_match",
-            "yaw_when_translating",
-            "command_stillness",
-            "lin_vel_xy_variance_l2",
-            "ang_vel_z_variance_l2",
-        }:
-            if reward_name == "track_ang_vel_z_exp" and velocity_factor < self.cfg.yaw_tracking_start_ratio:
+        factor_kind = self._get_reward_factor_kind(reward_name)
+        if factor_kind in {"velocity", "yaw_velocity"}:
+            if factor_kind == "yaw_velocity" and velocity_factor < self.cfg.yaw_tracking_start_ratio:
                 return 0.0
             return velocity_factor
-        if reward_name in {
-            "phase_match",
-            "swing_height",
-            "leg_toggle",
-            "single_leg_support",
-            "airtime_balance",
-            "double_support",
-            "dead_time",
-        }:
+        if factor_kind == "stepping":
             return stepping_factor
         return 1.0
+
+
+    def _get_reward_factor_kind(self, reward_name: str) -> str:
+        if reward_name == "track_ang_vel_z_exp":
+            return "yaw_velocity"
+        if reward_name in self._VELOCITY_REWARD_NAMES:
+            return "velocity"
+        if reward_name in self._STEPPING_REWARD_NAMES:
+            return "stepping"
+        return "constant"
 
 
     def _sample_uniform(self, value_range: tuple[float, float], batch_size: int) -> torch.Tensor:
@@ -110,6 +124,7 @@ class ZbotVelocityCommands:
         if enabled:
             self._command_time_left.zero_()
             self._commands.copy_(self._manual_commands)
+            self._update_command_buffers()
 
 
     def set_manual_commands(self, commands: torch.Tensor | list[float] | tuple[float, float, float]):
@@ -127,5 +142,5 @@ class ZbotVelocityCommands:
         self._manual_commands.copy_(command_tensor)
         if self._manual_command_override_enabled:
             self._commands.copy_(self._manual_commands)
-
+            self._update_command_buffers()
 
