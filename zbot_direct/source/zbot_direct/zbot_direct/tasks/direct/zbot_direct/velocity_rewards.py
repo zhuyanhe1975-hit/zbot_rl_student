@@ -11,7 +11,11 @@ class ZbotVelocityRewards:
 
     def _reward_track_ang_vel_z_exp(self):
         yaw_rate_error = torch.square(self._commands[:, 2] - self.base_ang_vel_z_b.squeeze(-1))
-        return torch.exp(-yaw_rate_error / 0.05)
+        return torch.exp(-yaw_rate_error / 0.25)
+
+
+    def _reward_yaw_rate_l1(self):
+        return torch.abs(self._commands[:, 2] - self.base_ang_vel_z_b.squeeze(-1))
 
 
     def _reward_command_forward_progress(self):
