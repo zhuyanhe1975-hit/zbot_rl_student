@@ -13,6 +13,7 @@ ground_env.py, velocity_env.py.
 Quick guide:
 - To add a task, add a small class here, then add its cfg in cfg.py.
 - To inspect rewards, Ctrl+click the class's cfg_cls and read reward_cfg or reward_scales.
+- For velocity tasks, Ctrl+click reward_scales_link to see the complete reward weights directly.
 - To change observations, follow the parent class named by the task below.
 - Velocity play tasks use keyboard commands and should run with num_envs=1.
 """
@@ -27,6 +28,7 @@ from .cfg import (
     Zbot6DofVelocityCfg,
     Zbot6DofVelocityImuCfg,
     Zbot6DofVelocityQuatTeacherCfg,
+    ZBOT_8DOF_VELOCITY_REWARD_SCALES,
     Zbot8DofBipedal0Cfg,
     Zbot8DofBipedal1Cfg,
     Zbot8DofBipedal2Cfg,
@@ -36,6 +38,7 @@ from .cfg import (
     Zbot8DofVelocityCfg,
     Zbot8DofWheelCfg,
 )
+from .tasks.direct.zbot_direct.velocity_env_cfg import DEFAULT_VELOCITY_REWARD_SCALES
 from .tasks.direct.zbot_direct.bipedal_env import (
     ZbotBipedalEnv,
     ZbotBipedalJointAccEnv,
@@ -81,6 +84,7 @@ class Zbot6DofVelocityTaskEnv(ZbotVelocityEnv):
     """6dof omnidirectional velocity tracking; play uses keyboard control."""
 
     cfg_cls = Zbot6DofVelocityCfg
+    reward_scales_link = DEFAULT_VELOCITY_REWARD_SCALES
     reward_impl = "tasks/direct/zbot_direct/velocity_rewards.py"
 
 
@@ -88,6 +92,7 @@ class Zbot6DofVelocityQuatTeacherTaskEnv(ZbotVelocityEnv):
     """6dof velocity teacher task; policy observes privileged base velocity and IMU quaternion."""
 
     cfg_cls = Zbot6DofVelocityQuatTeacherCfg
+    reward_scales_link = DEFAULT_VELOCITY_REWARD_SCALES
     reward_impl = "tasks/direct/zbot_direct/velocity_rewards.py"
 
 
@@ -95,6 +100,7 @@ class Zbot6DofVelocityImuTaskEnv(ZbotVelocityEnv):
     """6dof velocity student task; policy observes IMU-like signals, not base linear velocity."""
 
     cfg_cls = Zbot6DofVelocityImuCfg
+    reward_scales_link = DEFAULT_VELOCITY_REWARD_SCALES
     reward_impl = "tasks/direct/zbot_direct/velocity_rewards.py"
 
 
@@ -151,4 +157,5 @@ class Zbot8DofVelocityTaskEnv(ZbotVelocityEnv):
     """8dof omnidirectional velocity tracking; play uses keyboard control."""
 
     cfg_cls = Zbot8DofVelocityCfg
+    reward_scales_link = ZBOT_8DOF_VELOCITY_REWARD_SCALES
     reward_impl = "tasks/direct/zbot_direct/velocity_rewards.py"

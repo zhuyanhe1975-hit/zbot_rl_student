@@ -47,6 +47,28 @@ from .tasks.direct.zbot_direct.zbot_direct_robot_cfgs import (
 
 ROBOT_PRIM_PATH = "/World/envs/env_.*/Robot"
 
+ZBOT_8DOF_VELOCITY_REWARD_SCALES = {
+    "track_lin_vel_xy_exp": 8.0,
+    "track_ang_vel_z_exp": 0.5,
+    "command_forward_progress": 2.0,
+    "command_speed_shortfall": -1.0,
+    "lateral_velocity_match": 0.5,
+    "command_stillness": -0.2,
+    "lin_vel_xy_variance_l2": -0.05,
+    "ang_vel_z_variance_l2": 0.0,
+    "leg_toggle": 5.0,
+    "single_leg_support": 0.8,
+    "airtime_balance": -1.0,
+    "double_support": -0.4,
+    "action_rate_l2": -0.02,
+    "dof_torques_l2": -2.0e-4,
+    "joint_deviation_l1": -0.05,
+    "feet_slide": -0.5,
+    "feet_forward_bias_integral": -0.05,
+    "feet_downward": -1.0,
+    "feet_forward": -0.5,
+}
+
 
 @configclass
 class ZbotDirectTaskCfg(DirectRLEnvCfg):
@@ -352,9 +374,4 @@ class Zbot8DofVelocityCfg(ZbotVelocityEnvCfg):
     joint_target_lower = tuple(q - 0.5 * math.pi for q in reference_joint_pos)
     joint_target_upper = tuple(q + 0.5 * math.pi for q in reference_joint_pos)
 
-    reward_scales = {
-        **DEFAULT_VELOCITY_REWARD_SCALES,
-        "feet_forward_bias_integral": -0.05,
-        "feet_downward": -1.0,
-        "feet_forward": -0.5,
-    }
+    reward_scales = ZBOT_8DOF_VELOCITY_REWARD_SCALES
