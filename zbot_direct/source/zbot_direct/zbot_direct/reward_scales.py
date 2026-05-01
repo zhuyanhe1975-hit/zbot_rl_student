@@ -11,13 +11,14 @@ objects, so changes here are used by training without a separate sync step.
 
 ZBOT_6DOF_VELOCITY_REWARD_SCALES = {
     "track_lin_vel_xy_exp": 8.0,
-    "track_ang_vel_z_exp": 0.5,
+    "track_ang_vel_z_exp": 2.0,
     "command_forward_progress": 2.0,
     "command_speed_shortfall": -1.0,
     "lateral_velocity_match": 0.5,
-    "command_stillness": -0.2,
+    "yaw_when_translating": -0.4,
+    "command_stillness": -1.0,
     "lin_vel_xy_variance_l2": -0.05,
-    "ang_vel_z_variance_l2": 0.0,
+    "ang_vel_z_variance_l2": -0.02,
     "leg_toggle": 5.0,
     "single_leg_support": 0.8,
     "airtime_balance": -1.0,

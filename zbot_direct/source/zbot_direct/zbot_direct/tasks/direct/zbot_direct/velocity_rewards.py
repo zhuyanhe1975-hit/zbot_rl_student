@@ -62,10 +62,17 @@ class ZbotVelocityRewards:
     def _reward_command_stillness(self):
         cmd_xy = self._commands[:, :2]
         cmd_speed = torch.norm(cmd_xy, dim=1)
+        yaw_cmd = torch.abs(self._commands[:, 2])
         actual_speed = torch.norm(torch.cat((self.base_lin_vel_forward_b, self.base_lin_vel_side_b), dim=1), dim=1)
-        moving_cmd = cmd_speed > 0.15
+        actual_yaw_rate = torch.abs(self.base_ang_vel_z_b.squeeze(-1))
+        joint_motion = torch.mean(torch.abs(self._robot.data.joint_vel), dim=1)
+        standing_cmd = (cmd_speed < 0.05) & (yaw_cmd < 0.05)
         penalty = torch.zeros_like(cmd_speed)
-        penalty[moving_cmd] = (actual_speed[moving_cmd] < 0.05).float()
+        penalty[standing_cmd] = (
+            actual_speed[standing_cmd]
+            + 0.3 * actual_yaw_rate[standing_cmd]
+            + 0.02 * joint_motion[standing_cmd]
+        )
         return penalty
 
 
@@ -196,5 +203,4 @@ class ZbotVelocityRewards:
 
     def _reward_flat_orientation_l2(self):
         return torch.sum(torch.square(self._robot.data.projected_gravity_b[:, :2]), dim=1)
-
 

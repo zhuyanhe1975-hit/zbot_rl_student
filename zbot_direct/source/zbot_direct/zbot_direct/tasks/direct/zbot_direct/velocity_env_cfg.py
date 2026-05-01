@@ -26,7 +26,7 @@ class ZbotVelocityEnvCfg(DirectRLEnvCfg):
     state_space = 0
 
     command_resample_time_range = (4.0, 8.0)
-    standing_probability = 0.1
+    standing_probability = 0.2
     command_ranges = {
         "lin_vel_x": (-0.8, 0.8),
         "lin_vel_y": (-0.4, 0.4),
@@ -36,7 +36,7 @@ class ZbotVelocityEnvCfg(DirectRLEnvCfg):
     stepping_clearance_target = 0.10
     curriculum_warmup_steps = 2000
     curriculum_transition_steps = 8000
-    yaw_tracking_start_ratio = 0.75
+    yaw_tracking_start_ratio = 0.45
     xy_command_min_curriculum_scale = 0.25
     xy_command_curriculum_power = 1.5
 
