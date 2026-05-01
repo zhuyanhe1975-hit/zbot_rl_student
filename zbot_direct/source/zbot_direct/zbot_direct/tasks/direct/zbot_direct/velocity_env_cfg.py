@@ -8,6 +8,7 @@ from isaaclab.terrains import TerrainImporterCfg
 from isaaclab.utils import configclass
 
 from zbot_direct.reward_scales import DEFAULT_VELOCITY_REWARD_SCALES
+from zbot_direct.velocity_settings import ZBOT_VELOCITY_COMMAND_RANGES, ZBOT_VELOCITY_CURRICULUM
 
 
 @configclass
@@ -25,20 +26,16 @@ class ZbotVelocityEnvCfg(DirectRLEnvCfg):
     action_scale = 1.0
     state_space = 0
 
-    command_resample_time_range = (4.0, 8.0)
-    standing_probability = 0.2
-    command_ranges = {
-        "lin_vel_x": (-0.8, 0.8),
-        "lin_vel_y": (-0.4, 0.4),
-        "ang_vel_z": (-1.0, 1.0),
-    }
-    stepping_frequency_range = (0.8, 1.6)
-    stepping_clearance_target = 0.10
-    curriculum_warmup_steps = 2000
-    curriculum_transition_steps = 8000
-    yaw_tracking_start_ratio = 0.45
-    xy_command_min_curriculum_scale = 0.25
-    xy_command_curriculum_power = 1.5
+    command_ranges = ZBOT_VELOCITY_COMMAND_RANGES
+    command_resample_time_range = ZBOT_VELOCITY_CURRICULUM["command_resample_time_range"]
+    standing_probability = ZBOT_VELOCITY_CURRICULUM["standing_probability"]
+    stepping_frequency_range = ZBOT_VELOCITY_CURRICULUM["stepping_frequency_range"]
+    stepping_clearance_target = ZBOT_VELOCITY_CURRICULUM["stepping_clearance_target"]
+    curriculum_warmup_steps = ZBOT_VELOCITY_CURRICULUM["curriculum_warmup_steps"]
+    curriculum_transition_steps = ZBOT_VELOCITY_CURRICULUM["curriculum_transition_steps"]
+    yaw_tracking_start_ratio = ZBOT_VELOCITY_CURRICULUM["yaw_tracking_start_ratio"]
+    xy_command_min_curriculum_scale = ZBOT_VELOCITY_CURRICULUM["xy_command_min_curriculum_scale"]
+    xy_command_curriculum_power = ZBOT_VELOCITY_CURRICULUM["xy_command_curriculum_power"]
 
     termination_height = 0.05
     base_contact_force_threshold = 1000.0
