@@ -1,0 +1,483 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot name="zbot_6w_v1">
+  <joint name="FixedJoint1" type="fixed">
+    <origin xyz="-0.0374767 0. 0.0374766" rpy="0. 0.7854 3.1415927"/>
+    <parent link="b1"/>
+    <child link="a2"/>
+  </joint>
+  <joint name="FixedJoint2" type="fixed">
+    <origin xyz="-0.0374767 0. 0.0374766" rpy="0. 0.7854 3.1415927"/>
+    <parent link="b2"/>
+    <child link="a3"/>
+  </joint>
+  <joint name="FixedJoint3" type="fixed">
+    <origin xyz="-0.0374767 0. 0.0374766" rpy="0. 0.7854 3.1415927"/>
+    <parent link="b3"/>
+    <child link="a4"/>
+  </joint>
+  <joint name="FixedJoint4" type="fixed">
+    <origin xyz="-0.0374767 0. 0.0374766" rpy="0. 0.7854 3.1415927"/>
+    <parent link="b4"/>
+    <child link="a5"/>
+  </joint>
+  <joint name="FixedJoint5" type="fixed">
+    <origin xyz="-0.0374767 0. 0.0374766" rpy="0. 0.7854 3.1415927"/>
+    <parent link="b5"/>
+    <child link="a6"/>
+  </joint>
+  <joint name="FixedJoint_pa" type="fixed">
+    <origin xyz="0. 0. 0." rpy="0. 0. 0."/>
+    <parent link="zbot"/>
+    <child link="pivot_a"/>
+  </joint>
+  <joint name="FixedJoint_pb" type="fixed">
+    <origin xyz="-0.0374767 0. 0.0374766" rpy="-3.1415927 0.7854 -3.1415927"/>
+    <parent link="b6"/>
+    <child link="pivot_b"/>
+  </joint>
+  <joint name="RevoluteJoint_w1" type="continuous">
+    <origin xyz="0.03 0. -0.03" rpy="0. 0. 0."/>
+    <parent link="pivot_a"/>
+    <child link="wheel1"/>
+    <axis xyz="0. 1. 0."/>
+  </joint>
+  <joint name="RevoluteJoint_w2" type="continuous">
+    <origin xyz="-0.03 0. -0.03" rpy="0. 0. 0."/>
+    <parent link="pivot_a"/>
+    <child link="wheel2"/>
+    <axis xyz="0. 1. 0."/>
+  </joint>
+  <joint name="RevoluteJoint_w3" type="continuous">
+    <origin xyz="0.03 0. -0.03" rpy="3.1415927 0. 0. "/>
+    <parent link="pivot_b"/>
+    <child link="wheel3"/>
+    <axis xyz="0. 1. 0."/>
+  </joint>
+  <joint name="RevoluteJoint_w4" type="continuous">
+    <origin xyz="-0.03 0. -0.03" rpy="3.1415927 0. 0. "/>
+    <parent link="pivot_b"/>
+    <child link="wheel4"/>
+    <axis xyz="0. 1. 0."/>
+  </joint>
+  <joint name="joint1" type="continuous">
+    <origin xyz="0. 0. 0.053" rpy="0. 0.7853999 0. "/>
+    <parent link="zbot"/>
+    <child link="b1"/>
+    <axis xyz="0. 0. 1."/>
+  </joint>
+  <joint name="joint2" type="continuous">
+    <origin xyz="-0. 0. 0.053" rpy="0. 0.7853999 0. "/>
+    <parent link="a2"/>
+    <child link="b2"/>
+    <axis xyz="0. 0. 1."/>
+  </joint>
+  <joint name="joint3" type="continuous">
+    <origin xyz="-0. 0. 0.053" rpy="0. 0.7853999 0. "/>
+    <parent link="a3"/>
+    <child link="b3"/>
+    <axis xyz="0. 0. 1."/>
+  </joint>
+  <joint name="joint4" type="continuous">
+    <origin xyz="-0. 0. 0.053" rpy="0. 0.7853999 0. "/>
+    <parent link="a4"/>
+    <child link="b4"/>
+    <axis xyz="0. 0. 1."/>
+  </joint>
+  <joint name="joint5" type="continuous">
+    <origin xyz="-0. 0. 0.053" rpy="0. 0.7853999 0. "/>
+    <parent link="a5"/>
+    <child link="b5"/>
+    <axis xyz="0. 0. 1."/>
+  </joint>
+  <joint name="joint6" type="continuous">
+    <origin xyz="-0. 0. 0.053" rpy="0. 0.7853999 0. "/>
+    <parent link="a6"/>
+    <child link="b6"/>
+    <axis xyz="0. 0. 1."/>
+  </joint>
+  <link name="a2">
+    <inertial>
+      <origin xyz="-0.0082592 -0.0000001 0.028345 " rpy="0. 0. 0."/>
+      <mass value="0.25042"/>
+      <inertia ixx="0.0002534" ixy="-0." ixz="0.0000358" iyy="0.0001997" iyz="0." izz="0.0002594"/>
+    </inertial>
+    <visual>
+      <origin xyz="0. 0. 0." rpy="0. -0. 0."/>
+      <geometry>
+        <mesh filename="meshes/a2_visuals.obj" scale="1. 1. 1."/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0. 0. 0." rpy="0. -0. 0."/>
+      <geometry>
+        <mesh filename="meshes/a2_collisions.obj" scale="1. 1. 1."/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="a3">
+    <inertial>
+      <origin xyz="-0.0082592 -0.0000001 0.028345 " rpy="0. 0. 0."/>
+      <mass value="0.25042"/>
+      <inertia ixx="0.0002534" ixy="-0." ixz="0.0000358" iyy="0.0001997" iyz="0." izz="0.0002594"/>
+    </inertial>
+    <visual>
+      <origin xyz="0. 0. 0." rpy="0. -0. 0."/>
+      <geometry>
+        <mesh filename="meshes/a3_visuals.obj" scale="1. 1. 1."/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0. 0. 0." rpy="0. -0. 0."/>
+      <geometry>
+        <mesh filename="meshes/a3_collisions.obj" scale="1. 1. 1."/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="a4">
+    <inertial>
+      <origin xyz="-0.0082592 -0.0000001 0.028345 " rpy="0. 0. 0."/>
+      <mass value="0.25042"/>
+      <inertia ixx="0.0002534" ixy="-0." ixz="0.0000358" iyy="0.0001997" iyz="0." izz="0.0002594"/>
+    </inertial>
+    <visual>
+      <origin xyz="0. 0. 0." rpy="0. -0. 0."/>
+      <geometry>
+        <mesh filename="meshes/a4_visuals.obj" scale="1. 1. 1."/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0. 0. 0." rpy="0. -0. 0."/>
+      <geometry>
+        <mesh filename="meshes/a4_collisions.obj" scale="1. 1. 1."/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="a5">
+    <inertial>
+      <origin xyz="-0.0082592 -0.0000001 0.028345 " rpy="0. 0. 0."/>
+      <mass value="0.25042"/>
+      <inertia ixx="0.0002534" ixy="-0." ixz="0.0000358" iyy="0.0001997" iyz="0." izz="0.0002594"/>
+    </inertial>
+    <visual>
+      <origin xyz="0. 0. 0." rpy="0. -0. 0."/>
+      <geometry>
+        <mesh filename="meshes/a5_visuals.obj" scale="1. 1. 1."/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0. 0. 0." rpy="0. -0. 0."/>
+      <geometry>
+        <mesh filename="meshes/a5_collisions.obj" scale="1. 1. 1."/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="a6">
+    <inertial>
+      <origin xyz="-0.0082592 -0.0000001 0.028345 " rpy="0. 0. 0."/>
+      <mass value="0.25042"/>
+      <inertia ixx="0.0002534" ixy="-0." ixz="0.0000358" iyy="0.0001997" iyz="0." izz="0.0002594"/>
+    </inertial>
+    <visual>
+      <origin xyz="0. 0. 0." rpy="0. -0. 0."/>
+      <geometry>
+        <mesh filename="meshes/a6_visuals.obj" scale="1. 1. 1."/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0. 0. 0." rpy="0. -0. 0."/>
+      <geometry>
+        <mesh filename="meshes/a6_collisions.obj" scale="1. 1. 1."/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="b1">
+    <inertial>
+      <origin xyz="-0.011593 -0.0000001 0.023274 " rpy="0. 0. 0."/>
+      <mass value="0.25042"/>
+      <inertia ixx="0.0002205" ixy="0." ixz="-0.000003" iyy="0.0001997" iyz="0." izz="0.0002922"/>
+    </inertial>
+    <visual>
+      <origin xyz="0. 0. 0." rpy="0. -0.0000001 0. "/>
+      <geometry>
+        <mesh filename="meshes/b1_visuals.obj" scale="1. 1. 1."/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0. 0. 0." rpy="0. -0.0000001 0. "/>
+      <geometry>
+        <mesh filename="meshes/b1_collisions.obj" scale="1. 1. 1."/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="b2">
+    <inertial>
+      <origin xyz="-0.011593 -0.0000001 0.023274 " rpy="0. 0. 0."/>
+      <mass value="0.25042"/>
+      <inertia ixx="0.0002205" ixy="0." ixz="-0.000003" iyy="0.0001997" iyz="0." izz="0.0002922"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0. 0. 0." rpy="0. -0.0000018 0. "/>
+      <geometry>
+        <mesh filename="meshes/b2_visuals.obj" scale="1. 1. 1."/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0. 0. 0." rpy="0. -0.0000018 0. "/>
+      <geometry>
+        <mesh filename="meshes/b2_collisions.obj" scale="1. 1. 1."/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="b3">
+    <inertial>
+      <origin xyz="-0.011593 -0.0000001 0.023274 " rpy="0. 0. 0."/>
+      <mass value="0.25042"/>
+      <inertia ixx="0.0002205" ixy="0." ixz="-0.000003" iyy="0.0001997" iyz="0." izz="0.0002922"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0. 0. 0." rpy="0. -0.0000001 0. "/>
+      <geometry>
+        <mesh filename="meshes/b3_visuals.obj" scale="1. 1. 1."/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0. 0. 0." rpy="0. -0.0000001 0. "/>
+      <geometry>
+        <mesh filename="meshes/b3_collisions.obj" scale="1. 1. 1."/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="b4">
+    <inertial>
+      <origin xyz="-0.011593 -0.0000001 0.023274 " rpy="0. 0. 0."/>
+      <mass value="0.25042"/>
+      <inertia ixx="0.0002205" ixy="0." ixz="-0.000003" iyy="0.0001997" iyz="0." izz="0.0002922"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0. 0. 0." rpy="0. -0.0000018 0. "/>
+      <geometry>
+        <mesh filename="meshes/b4_visuals.obj" scale="1. 1. 1."/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0. 0. 0." rpy="0. -0.0000018 0. "/>
+      <geometry>
+        <mesh filename="meshes/b4_collisions.obj" scale="1. 1. 1."/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="b5">
+    <inertial>
+      <origin xyz="-0.011593 -0.0000001 0.023274 " rpy="0. 0. 0."/>
+      <mass value="0.25042"/>
+      <inertia ixx="0.0002205" ixy="0." ixz="-0.000003" iyy="0.0001997" iyz="0." izz="0.0002922"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0. 0. 0." rpy="0. -0.0000001 0. "/>
+      <geometry>
+        <mesh filename="meshes/b5_visuals.obj" scale="1. 1. 1."/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0. 0. 0." rpy="0. -0.0000001 0. "/>
+      <geometry>
+        <mesh filename="meshes/b5_collisions.obj" scale="1. 1. 1."/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="b6">
+    <inertial>
+      <origin xyz="-0.011593 -0.0000001 0.023274 " rpy="0. 0. 0."/>
+      <mass value="0.25042"/>
+      <inertia ixx="0.0002205" ixy="0." ixz="-0.000003" iyy="0.0001997" iyz="0." izz="0.0002922"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0. 0. 0." rpy="0. -0.0000018 0. "/>
+      <geometry>
+        <mesh filename="meshes/b6_visuals.obj" scale="1. 1. 1."/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0. 0. 0." rpy="0. -0.0000018 0. "/>
+      <geometry>
+        <mesh filename="meshes/b6_collisions.obj" scale="1. 1. 1."/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="pivot_a">
+    <inertial>
+      <origin xyz="0. 0. 0." rpy="0. 0. 0."/>
+      <mass value="0.06"/>
+      <inertia ixx="0.001" ixy="0." ixz="0." iyy="0.001" iyz="0." izz="0.001"/>
+    </inertial>
+    <visual>
+      <origin xyz="0. 0. -0.0025" rpy="0. 0. 0."/>
+      <geometry>
+        <box size="0.07 0.04 0.005"/>
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0. -0.0175 -0.02 " rpy="0. 0. 0."/>
+      <geometry>
+        <box size="0.07 0.005 0.03 "/>
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0. 0.0175 -0.02 " rpy="0. 0. 0."/>
+      <geometry>
+        <box size="0.07 0.005 0.03 "/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0. 0. -0.0025" rpy="0. 0. 0."/>
+      <geometry>
+        <box size="0.07 0.04 0.005"/>
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0. -0.0175 -0.02 " rpy="0. 0. 0."/>
+      <geometry>
+        <box size="0.07 0.005 0.03 "/>
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0. 0.0175 -0.02 " rpy="0. 0. 0."/>
+      <geometry>
+        <box size="0.07 0.005 0.03 "/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="pivot_b">
+    <inertial>
+      <origin xyz="0. 0. 0." rpy="0. 0. 0."/>
+      <mass value="0.06"/>
+      <inertia ixx="0.001" ixy="0." ixz="0." iyy="0.001" iyz="0." izz="0.001"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0. 0. -0.0025" rpy="0. 0. 0."/>
+      <geometry>
+        <box size="0.07 0.04 0.005"/>
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0. -0.0175 -0.02 " rpy="0. 0. 0."/>
+      <geometry>
+        <box size="0.07 0.005 0.03 "/>
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0. 0.0175 -0.02 " rpy="0. 0. 0."/>
+      <geometry>
+        <box size="0.07 0.005 0.03 "/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0. 0. -0.0025" rpy="0. 0. 0."/>
+      <geometry>
+        <box size="0.07 0.04 0.005"/>
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="-0. -0.0175 -0.02 " rpy="0. 0. 0."/>
+      <geometry>
+        <box size="0.07 0.005 0.03 "/>
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="-0. 0.0175 -0.02 " rpy="0. 0. 0."/>
+      <geometry>
+        <box size="0.07 0.005 0.03 "/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="wheel1">
+    <inertial>
+      <origin xyz="0. 0. 0." rpy="0. 0. 0."/>
+      <mass value="0.06"/>
+      <inertia ixx="0.001" ixy="0." ixz="0." iyy="0.001" iyz="0." izz="0.001"/>
+    </inertial>
+    <visual>
+      <origin xyz="0. 0. 0." rpy="1.5707964 0. 0. "/>
+      <geometry>
+        <cylinder radius="0.02" length="0.02"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0. 0. 0." rpy="1.5707964 0. 0. "/>
+      <geometry>
+        <cylinder radius="0.02" length="0.02"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="wheel2">
+    <inertial>
+      <origin xyz="0. 0. 0." rpy="0. 0. 0."/>
+      <mass value="0.06"/>
+      <inertia ixx="0.001" ixy="0." ixz="0." iyy="0.001" iyz="0." izz="0.001"/>
+    </inertial>
+    <visual>
+      <origin xyz="0. 0. 0." rpy="1.5707964 0. 0. "/>
+      <geometry>
+        <cylinder radius="0.02" length="0.02"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0. 0. 0." rpy="1.5707964 0. 0. "/>
+      <geometry>
+        <cylinder radius="0.02" length="0.02"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="wheel3">
+    <inertial>
+      <origin xyz="0. 0. 0." rpy="0. 0. 0."/>
+      <mass value="0.06"/>
+      <inertia ixx="0.001" ixy="0." ixz="0." iyy="0.001" iyz="0." izz="0.001"/>
+    </inertial>
+    <visual>
+      <origin xyz="0. 0. 0." rpy="1.5707964 0. 0. "/>
+      <geometry>
+        <cylinder radius="0.02" length="0.02"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0. 0. 0." rpy="1.5707964 0. 0. "/>
+      <geometry>
+        <cylinder radius="0.02" length="0.02"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="wheel4">
+    <inertial>
+      <origin xyz="0. 0. 0." rpy="0. 0. 0."/>
+      <mass value="0.06"/>
+      <inertia ixx="0.001" ixy="0." ixz="0." iyy="0.001" iyz="0." izz="0.001"/>
+    </inertial>
+    <visual>
+      <origin xyz="0. 0. 0." rpy="1.5707964 0. 0. "/>
+      <geometry>
+        <cylinder radius="0.02" length="0.02"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0. 0. 0." rpy="1.5707964 0. 0. "/>
+      <geometry>
+        <cylinder radius="0.02" length="0.02"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="zbot">
+    <visual>
+      <origin xyz="0. 0. 0." rpy="0. 0. 0."/>
+      <geometry>
+        <mesh filename="meshes/a1_visuals.obj" scale="1. 1. 1."/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0. 0. 0." rpy="0. 0. 0."/>
+      <geometry>
+        <mesh filename="meshes/a1_collisions.obj" scale="1. 1. 1."/>
+      </geometry>
+    </collision>
+  </link>
+</robot>

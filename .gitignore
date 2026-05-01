@@ -1,0 +1,24 @@
+# Python / build cache
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Isaac Lab / Hydra generated outputs
+outputs/
+logs/
+wandb/
+runs/
+
+# Local orchestration/session state
+.omx/
+
+# Exported policies generated during play/train
+exported/
+*.onnx
+*.jit
+
+# Editor / OS noise
+.DS_Store
+.vscode/
+.idea/

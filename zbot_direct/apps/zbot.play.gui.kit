@@ -1,0 +1,179 @@
+[package]
+title = "Zbot Play GUI"
+description = "Minimal GUI experience for Zbot policy playback"
+version = "0.1.0"
+keywords = ["experience", "zbot", "isaaclab", "playback", "gui"]
+
+[dependencies]
+# Core simulation stack from Isaac Lab headless app
+"omni.physx" = {}
+"omni.physx.tensors" = {}
+"omni.physx.fabric" = {}
+"omni.warp.core" = {}
+"usdrt.scenegraph" = {}
+"omni.kit.loop" = {}
+"omni.kit.telemetry" = {}
+"omni.usd" = {}
+"omni.kit.usd.layers" = {}
+"omni.kit.usd.mdl" = {}
+"omni.usd.metrics.assembler.ui" = {}
+"isaacsim.simulation_app" = {}
+"isaacsim.core.api" = {}
+"isaacsim.core.cloner" = {}
+"isaacsim.core.utils" = {}
+"isaacsim.core.version" = {}
+"isaacsim.gui.components" = {}
+
+# Minimal local GUI shell
+"omni.kit.uiapp" = {}
+"omni.kit.mainwindow" = {}
+"omni.kit.window.stage" = {}
+"omni.kit.property.bundle" = {}
+"omni.kit.manipulator.camera" = {}
+"omni.kit.manipulator.prim" = {}
+"omni.kit.manipulator.selection" = {}
+"omni.kit.widget.toolbar" = {}
+"omni.kit.window.toolbar" = {}
+"omni.kit.viewport.window" = {}
+"omni.kit.viewport.rtx" = {}
+"omni.hydra.rtx" = {}
+"omni.rtx.settings.core" = {}
+"omni.kit.viewport.menubar.camera" = {}
+"omni.kit.viewport.menubar.display" = {}
+"omni.kit.viewport.menubar.lighting" = {}
+"omni.kit.viewport.menubar.render" = {}
+"omni.kit.viewport.menubar.settings" = {}
+
+# Isaac Lab extensions
+"isaaclab" = {order = 1000}
+"isaaclab_assets" = {order = 1000}
+"isaaclab_tasks" = {order = 1000}
+"isaaclab_mimic" = {order = 1000}
+"isaaclab_rl" = {order = 1000}
+
+[settings]
+app.name = "Isaac-Sim"
+app.versionFile = "${exe-path}/VERSION"
+app.folder = "${exe-path}/"
+app.version = "5.1.0"
+app.window.title = "Zbot Play"
+app.window.hideUi = false
+app.content.emptyStageOnStart = false
+app.enableStdoutOutput = false
+app.audio.enabled = false
+app.vulkan = true
+app.profilerBackend = "nvtx"
+app.asyncRendering = false
+app.asyncRenderingLowLatency = false
+app.hydraEngine.waitIdle = true
+app.renderer.waitIdle = true
+app.runLoops.main.rateLimitEnabled = false
+app.useFabricSceneDelegate = true
+app.settings.persistent = true
+app.viewport.defaultCamPos.x = 5
+app.viewport.defaultCamPos.y = 5
+app.viewport.defaultCamPos.z = 5
+app.renderer.resolution.width = 1280
+app.renderer.resolution.height = 720
+app.renderer.skipWhileMinimized = false
+app.renderer.sleepMsOnFocus = 0
+app.renderer.sleepMsOutOfFocus = 0
+app.updateOrder.checkForHydraRenderComplete = 1000
+
+# Physics / USD updates
+physics.updateToUsd = false
+physics.updateParticlesToUsd = false
+physics.updateVelocitiesToUsd = false
+physics.updateForceSensorsToUsd = false
+physics.outputVelocitiesLocalSpace = false
+physics.useFastCache = false
+physics.visualizationDisplayJoints = false
+physics.fabricUpdateTransformations = false
+physics.fabricUpdateVelocities = false
+physics.fabricUpdateForceSensors = false
+physics.fabricUpdateJointStates = false
+physics.fabricUseGPUInterop = true
+
+# Rendering defaults biased for responsiveness
+renderer.enabled = "rtx"
+renderer.active = "rtx"
+renderer.multiGpu.enabled = false
+renderer.multiGpu.autoEnable = false
+renderer.multiGpu.maxGpuCount = 1
+'rtx-transient'.resourcemanager.enableTextureStreaming = true
+rtx-transient.dlssg.enabled = false
+rtx-transient.dldenoiser.enabled = false
+rtx.hydra.enableSemanticSchema = true
+rtx.hydra.readTransformsFromFabricInRenderDelegate = true
+rtx.mdltranslator.mdlDistilling = false
+rtx.newDenoiser.enabled = false
+rtx.pathtracing.optixDenoiser.enabled = false
+rtx.raytracing.cached.enabled = false
+rtx.reflections.enabled = false
+rtx.indirectDiffuse.enabled = false
+rtx.translucency.enabled = false
+rtx.ambientOcclusion.enabled = false
+rtx.directLighting.sampledLighting.enabled = true
+rtx.directLighting.sampledLighting.samplesPerPixel = 1
+rtx.post.aa.op = 2
+rtx.post.dlss.execMode = 0
+omni.replicator.asyncRendering = false
+exts."omni.replicator.core".Orchestrator.enabled = false
+exts."omni.kit.renderer.core".present.enabled = false
+
+# Avoid runtime listeners and unused startup services
+isaac.startup.ros_bridge_extension = ""
+metricsAssembler.changeListenerEnabled = false
+
+[settings.app.exts]
+folders = [
+    "${exe-path}/exts",
+    "${exe-path}/extscore",
+    "${exe-path}/../exts",
+    "${exe-path}/../extsDeprecated",
+    "${exe-path}/../extscache",
+    "${exe-path}/../extsPhysics",
+    "${exe-path}/../isaacsim/exts",
+    "${exe-path}/../isaacsim/extsDeprecated",
+    "${exe-path}/../isaacsim/extscache",
+    "${exe-path}/../isaacsim/extsPhysics",
+    "${app}",
+    "/home/yhzhu/isaaclab/source",
+    "${app}/../source",
+]
+
+[settings.exts."omni.kit.registry.nucleus"]
+registries = [
+    { name = "kit/default", url = "https://ovextensionsprod.blob.core.windows.net/exts/kit/prod/107/shared" },
+    { name = "kit/sdk", url = "https://ovextensionsprod.blob.core.windows.net/exts/kit/prod/sdk/${kit_version_short}/${kit_git_hash}" },
+    { name = "kit/community", url = "https://dw290v42wisod.cloudfront.net/exts/kit/community" },
+]
+
+[settings.app.python]
+interceptSysStdOutput = false
+logSysStdOutput = false
+
+[settings.persistent]
+app.file.recentFiles = []
+app.stage.upAxis = "Z"
+app.stage.movePrimInPlace = false
+app.stage.instanceableOnCreatingReference = false
+app.stage.materialStrength = "weakerThanDescendants"
+app.transform.gizmoUseSRT = true
+app.viewport.grid.scale = 1.0
+app.viewport.pickingMode = "kind:model.ALL"
+app.viewport.camMoveVelocity = 0.05
+app.viewport.gizmo.scale = 0.01
+app.viewport.previewOnPeek = false
+app.viewport.snapToSurface = false
+app.viewport.displayOptions = 31951
+simulation.minFrameRate = 15
+simulation.defaultMetersPerUnit = 1.0
+omnigraph.updateToUsd = false
+omnigraph.useSchemaPrims = true
+omnigraph.disablePrimNodes = true
+omni.replicator.captureOnPlay = true
+renderer.startupMessageDisplayed = true
+
+[settings.crashreporter.data]
+experience = "Zbot Play"
