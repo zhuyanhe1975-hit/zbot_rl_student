@@ -87,6 +87,14 @@ $HOME/isaaclab/isaaclab.sh -p zbot_direct/scripts/rsl_rl/play_keyboard.py \
   --load_run ./pth/Zbot-Direct-6dof-bipedal-velocity-v0
 ```
 
+键盘控制说明：
+
+- 方向键或小键盘控制 `vx/vy`。
+- `Z/X` 控制 yaw 角速度 `wz`。
+- `E` 增大速度倍率。
+- `Q` 减小速度倍率。
+- `L` 清零当前速度命令。
+
 ## 训练任务
 
 ```bash

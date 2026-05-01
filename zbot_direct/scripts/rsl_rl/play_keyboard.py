@@ -25,6 +25,8 @@ parser.add_argument("--task", type=str, default=None, help="Name of the task.")
 parser.add_argument("--agent", type=str, default="rsl_rl_cfg_entry_point", help="RL agent configuration entry point.")
 parser.add_argument("--seed", type=int, default=None, help="Seed used for the environment.")
 parser.add_argument("--real-time", action="store_true", default=True, help="Run in real time, if possible.")
+parser.add_argument("--speed_scale", type=float, default=1.0, help="Initial keyboard command speed scale.")
+parser.add_argument("--speed_scale_step", type=float, default=0.1, help="Keyboard speed scale change per key press.")
 cli_args.add_rsl_rl_args(parser)
 AppLauncher.add_app_launcher_args(parser)
 args_cli, hydra_args = parser.parse_known_args()
@@ -70,7 +72,7 @@ def _checkpoint_from_dir(directory: str) -> str:
 
 def _create_keyboard(env) -> Se2Keyboard:
     command_ranges = env.unwrapped.cfg.command_ranges
-    return Se2Keyboard(
+    keyboard = Se2Keyboard(
         Se2KeyboardCfg(
             sim_device=env.unwrapped.device,
             v_x_sensitivity=float(max(abs(v) for v in command_ranges["lin_vel_x"])),
@@ -78,6 +80,36 @@ def _create_keyboard(env) -> Se2Keyboard:
             omega_z_sensitivity=float(max(abs(v) for v in command_ranges["ang_vel_z"])),
         )
     )
+    return keyboard
+
+
+class KeyboardCommandScaler:
+    def __init__(self, keyboard: Se2Keyboard, initial_scale: float, step: float):
+        self.keyboard = keyboard
+        self.scale = min(1.0, max(0.0, initial_scale))
+        self.step = abs(step)
+        self.keyboard.add_callback("E", self.increase)
+        self.keyboard.add_callback("Q", self.decrease)
+
+    def increase(self):
+        self.scale = min(1.0, self.scale + self.step)
+        print(f"[INFO] Keyboard speed scale: {self.scale:.2f}")
+
+    def decrease(self):
+        self.scale = max(0.0, self.scale - self.step)
+        print(f"[INFO] Keyboard speed scale: {self.scale:.2f}")
+
+    def advance(self) -> torch.Tensor:
+        return self.keyboard.advance() * self.scale
+
+    def __str__(self) -> str:
+        return (
+            f"{self.keyboard}\n"
+            "\t----------------------------------------------\n"
+            "\tIncrease speed scale: E\n"
+            "\tDecrease speed scale: Q\n"
+            f"\tCurrent speed scale: {self.scale:.2f}"
+        )
 
 
 def _enable_manual_velocity_control(env) -> None:
@@ -133,7 +165,11 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     load_runner_checkpoint_compat(runner, resume_path)
 
     policy = runner.get_inference_policy(device=env.unwrapped.device)
-    keyboard = _create_keyboard(env)
+    keyboard = KeyboardCommandScaler(
+        _create_keyboard(env),
+        initial_scale=args_cli.speed_scale,
+        step=args_cli.speed_scale_step,
+    )
     print(keyboard)
 
     dt = env.unwrapped.step_dt
