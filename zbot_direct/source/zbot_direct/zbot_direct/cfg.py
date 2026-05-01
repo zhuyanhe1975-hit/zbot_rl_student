@@ -320,9 +320,16 @@ class Zbot6DofVelocityCfg(ZbotVelocityEnvCfg):
 
 
 @configclass
+class Zbot6DofVelocityQuatTeacherCfg(Zbot6DofVelocityCfg):
+    observation_space = 37
+    teacher_observes_base_quat = True
+
+
+@configclass
 class Zbot6DofVelocityImuCfg(Zbot6DofVelocityCfg):
     observation_space = 34
     policy_observes_base_lin_vel = False
+    teacher_observes_base_quat = True
     provide_teacher_observations = True
 
 

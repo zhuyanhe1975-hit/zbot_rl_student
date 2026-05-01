@@ -123,6 +123,7 @@ $HOME/isaaclab/isaaclab.sh -p zbot_direct/scripts/rsl_rl/play_keyboard.py \
 ```text
 Zbot-Direct-6dof-bipedal-v0
 Zbot-Direct-6dof-bipedal-velocity-v0
+Zbot-Direct-6dof-bipedal-velocity-quat-v0
 Zbot-Direct-6dof-bipedal-velocity-imu-v0
 Zbot-Direct-6dof-bipedal-quat-v0
 Zbot-Direct-6dof-bipedal-to-snake-v0
@@ -155,14 +156,26 @@ Zbot-Direct-6dof-bipedal-velocity-imu-v0
 
 这个任务用于研究更接近真机部署的观测形式。
 
-- 教师 observation：包含 `base_lin_vel_b`，这是仿真特权信息，用于生成教师动作。
+- 教师 observation：包含 `base_lin_vel_b` 和 `base_quat_w`，这是仿真特权信息和 IMU 姿态信息，用于生成教师动作。
 - 学生 policy observation：不包含 `base_lin_vel_b`，只保留更接近硬件可获得的信息，例如 IMU quat、IMU 角速度、重力方向、关节状态、速度命令和历史动作。
 - reward 仍然可以使用仿真里的真实 base 速度，因为 reward 不部署到硬件上。
 
-训练学生时，需要加载一个已训练好的 6dof velocity 教师 checkpoint。`train.sh` 中已有候选命令：
+训练学生前，建议先训练带 quat 的教师任务：
+
+```text
+Zbot-Direct-6dof-bipedal-velocity-quat-v0
+```
+
+把精选教师 checkpoint 放到：
+
+```text
+pth/Zbot-Direct-6dof-bipedal-velocity-quat-v0/
+```
+
+然后训练学生，`train.sh` 中已有候选命令：
 
 ```bash
-# $HOME/isaaclab/isaaclab.sh -p zbot_direct/scripts/rsl_rl/train.py --task=Zbot-Direct-6dof-bipedal-velocity-imu-v0 --num_envs=1024 --max_iterations=15000 --headless --load_run ./pth/Zbot-Direct-6dof-bipedal-velocity-v0 --log_root_path /home/yhzhu/myWorks_vips/zbot_rl_runs/zbot_rl_student
+# $HOME/isaaclab/isaaclab.sh -p zbot_direct/scripts/rsl_rl/train.py --task=Zbot-Direct-6dof-bipedal-velocity-imu-v0 --num_envs=1024 --max_iterations=1500 --headless --load_run ./pth/Zbot-Direct-6dof-bipedal-velocity-quat-v0 --log_root_path /home/yhzhu/myWorks_vips/zbot_rl_runs/zbot_rl_student
 ```
 
 训练完成后，把精选 student checkpoint 放到：

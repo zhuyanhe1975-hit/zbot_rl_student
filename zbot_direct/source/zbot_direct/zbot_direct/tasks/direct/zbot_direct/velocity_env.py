@@ -86,19 +86,21 @@ class ZbotVelocityEnv(
         self._joint_pos_target_delta = self._processed_actions - self._joint_reference_pos
 
     def _get_teacher_observations(self) -> torch.Tensor:
-        return torch.cat(
-            (
-                self.base_lin_vel_b,
-                self.base_ang_vel_b,
-                self._robot.data.projected_gravity_b,
-                self._commands,
-                self._get_step_command_obs(),
-                self._robot.data.joint_pos - self._joint_reference_pos,
-                self._robot.data.joint_vel,
-                self._actions,
-            ),
-            dim=-1,
+        observation_terms = (
+            [self.base_lin_vel_b, self.base_quat_w]
+            if getattr(self.cfg, "teacher_observes_base_quat", False)
+            else [self.base_lin_vel_b]
         )
+        observation_terms += [
+            self.base_ang_vel_b,
+            self._robot.data.projected_gravity_b,
+            self._commands,
+            self._get_step_command_obs(),
+            self._robot.data.joint_pos - self._joint_reference_pos,
+            self._robot.data.joint_vel,
+            self._actions,
+        ]
+        return torch.cat(observation_terms, dim=-1)
 
     def _get_policy_observations(self) -> torch.Tensor:
         if getattr(self.cfg, "policy_observes_base_lin_vel", True):

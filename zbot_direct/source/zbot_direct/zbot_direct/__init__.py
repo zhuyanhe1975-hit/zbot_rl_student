@@ -28,6 +28,11 @@ _TASKS = (
         "Zbot6DofVelocityCfg",
     ),
     (
+        "Zbot-Direct-6dof-bipedal-velocity-quat-v0",
+        "Zbot6DofVelocityQuatTeacherTaskEnv",
+        "Zbot6DofVelocityQuatTeacherCfg",
+    ),
+    (
         "Zbot-Direct-6dof-bipedal-velocity-imu-v0",
         "Zbot6DofVelocityImuTaskEnv",
         "Zbot6DofVelocityImuCfg",
