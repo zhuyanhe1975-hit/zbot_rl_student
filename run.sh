@@ -3,7 +3,8 @@ set -euo pipefail
 
 # Activate exactly one command. Keep each command on one line so the active result is obvious.
 
-$HOME/isaaclab/isaaclab.sh -p zbot_direct/scripts/rsl_rl/play_keyboard.py --task=Zbot-Direct-6dof-bipedal-velocity-v0 --num_envs=1 --real-time --load_run ./pth/Zbot-Direct-6dof-bipedal-velocity-v0
+# $HOME/isaaclab/isaaclab.sh -p zbot_direct/scripts/rsl_rl/play_keyboard.py --task=Zbot-Direct-6dof-bipedal-velocity-v0 --num_envs=1 --real-time --load_run ./pth/Zbot-Direct-6dof-bipedal-velocity-v0
+$HOME/isaaclab/isaaclab.sh -p zbot_direct/scripts/rsl_rl/play_keyboard.py --task=Zbot-Direct-6dof-bipedal-velocity-quat-v0 --num_envs=1 --real-time --load_run "$(find /home/yhzhu/myWorks_vips/zbot_rl_runs/zbot_rl_student/zbot_direct -mindepth 2 -maxdepth 2 -type f -name 'model_*.pt' -printf '%T@ %p\n' | sort -n | tail -1 | cut -d' ' -f2-)"
 # $HOME/isaaclab/isaaclab.sh -p zbot_direct/scripts/rsl_rl/play_keyboard.py --task=Zbot-Direct-6dof-bipedal-velocity-quat-v0 --num_envs=1 --real-time --load_run ./pth/Zbot-Direct-6dof-bipedal-velocity-quat-v0
 # $HOME/isaaclab/isaaclab.sh -p zbot_direct/scripts/rsl_rl/play_keyboard.py --task=Zbot-Direct-6dof-bipedal-velocity-imu-v0 --num_envs=1 --real-time --load_run ./pth/Zbot-Direct-6dof-bipedal-velocity-imu-v0
 # $HOME/isaaclab/isaaclab.sh -p zbot_direct/scripts/rsl_rl/play_keyboard.py --task=Zbot-Direct-8dof-bipedal-velocity-v0 --num_envs=1 --real-time --load_run ./pth/Zbot-Direct-8dof-bipedal-velocity-v0
